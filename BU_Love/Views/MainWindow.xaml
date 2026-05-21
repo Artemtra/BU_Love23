@@ -1,0 +1,48 @@
+﻿<Window x:Class="BU_Love.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="USED TECH SHOP" 
+        WindowState="Maximized"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="#1a1a1a"
+        Foreground="White"
+        FontFamily="Segoe UI">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="80"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2d2d2d" Padding="30,0">
+            <Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="📱" FontSize="36" Margin="0,0,15,0"/>
+                    <TextBlock Text="BU_Love" FontSize="32" FontWeight="Bold" Foreground="#4CAF50"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="🛒 КОРЗИНА" Click="CartButton_Click"
+                            Background="#2196F3" Foreground="White" FontSize="18" FontWeight="Bold"
+                            Padding="25,12" BorderThickness="0" Cursor="Hand" Margin="0,0,15,0"/>
+                    <Button Content="🔑 АДМИН" Click="AdminButton_Click"
+                            Background="#FF9800" Foreground="White" FontSize="18" FontWeight="Bold"
+                            Padding="25,12" BorderThickness="0" Cursor="Hand"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Категории -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <WrapPanel x:Name="CategoriesPanel" Margin="30" HorizontalAlignment="Center"/>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#2d2d2d" Padding="30,0">
+            <TextBlock x:Name="CartInfo" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+    </Grid>
+</Window>

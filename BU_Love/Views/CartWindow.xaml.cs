@@ -1,0 +1,299 @@
+﻿using BU_Love.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+
+namespace BU_Love.Views
+{
+    /// <summary>
+    /// Логика взаимодействия для CartWindow.xaml
+    /// </summary>
+    public partial class CartWindow : Window
+    {
+        private readonly MainViewModel _mainVm;
+
+        public CartWindow(MainViewModel mainViewModel)
+        {
+            InitializeComponent();
+            _mainVm = mainViewModel;
+            Loaded += (s, e) => RefreshCart();
+        }
+        private void PlusButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is CartItem item)
+            {
+                // Проверяем, не превышает ли количество остаток на складе
+                if (item.Quantity + 1 > item.Product.StockQuantity)
+                {
+                    MessageBox.Show(
+                        $"Нельзя добавить больше! В наличии только {item.Product.StockQuantity} шт.",
+                        "Ограничение",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+
+                item.Quantity++;
+                RefreshCart();
+            }
+        }
+        private void RefreshCart()
+        {
+            CartItemsPanel.Children.Clear();
+
+            if (!_mainVm.CartItems.Any())
+            {
+                CartItemsPanel.Children.Add(new TextBlock
+                {
+                    Text = "Корзина пуста",
+                    FontSize = 24,
+                    Foreground = new SolidColorBrush(Color.FromRgb(0xaa, 0xaa, 0xaa)),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(0, 50, 0, 0)
+                });
+            }
+            else
+            {
+                foreach (var item in _mainVm.CartItems)
+                {
+                    var border = new Border
+                    {
+                        Padding = new Thickness(20),
+                        Margin = new Thickness(0, 10, 0, 10),
+                        Background = new SolidColorBrush(Color.FromRgb(0x2d, 0x2d, 0x2d)),
+                        CornerRadius = new CornerRadius(10)
+                    };
+
+                    var grid = new Grid();
+                    grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
+                    grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(200) });
+
+                    // Картинка товара
+                    var image = new Image
+                    {
+                        Width = 80,
+                        Height = 80,
+                        Stretch = Stretch.Uniform,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+
+                    if (!string.IsNullOrEmpty(item.Product.ImageUrl))
+                    {
+                        try
+                        {
+                            var imageUrl = "http://localhost:5000" + item.Product.ImageUrl;
+                            image.Source = new BitmapImage(new Uri(imageUrl, UriKind.Absolute));
+                        }
+                        catch { }
+                    }
+                    else
+                    {
+                        // Заглушка если нет картинки
+                        image.Source = new BitmapImage(new Uri("https://via.placeholder.com/80"));
+                    }
+
+                    Grid.SetColumn(image, 0);
+                    grid.Children.Add(image);
+
+                    // Информация о товаре
+                    var infoStack = new StackPanel
+                    {
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Margin = new Thickness(15, 0, 15, 0)
+                    };
+
+                    infoStack.Children.Add(new TextBlock
+                    {
+                        Text = item.Product.Name,
+                        FontSize = 20,
+                        FontWeight = FontWeights.Bold
+                    });
+
+                    infoStack.Children.Add(new TextBlock
+                    {
+                        Text = item.Product.Description,
+                        FontSize = 14,
+                        Foreground = new SolidColorBrush(Color.FromRgb(0xaa, 0xaa, 0xaa)),
+                        TextWrapping = TextWrapping.Wrap,
+                        Margin = new Thickness(0, 5, 0, 0)
+                    });
+
+                    infoStack.Children.Add(new TextBlock
+                    {
+                        Text = $"Цена: {item.Product.Price:C}",
+                        FontSize = 16,
+                        Margin = new Thickness(0, 10, 0, 0)
+                    });
+
+                    Grid.SetColumn(infoStack, 1);
+                    grid.Children.Add(infoStack);
+
+                    // Количество и сумма
+                    var rightStack = new StackPanel
+                    {
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Right
+                    };
+
+                    // Кнопки +/-
+                    var quantityPanel = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Margin = new Thickness(0, 0, 0, 10)
+                    };
+
+                    var minusBtn = new Button
+                    {
+                        Content = "−",
+                        Width = 30,
+                        Height = 30,
+                        FontSize = 18,
+                        FontWeight = FontWeights.Bold,
+                        Background = new SolidColorBrush(Color.FromRgb(0xff, 0x44, 0x44)),
+                        Foreground = new SolidColorBrush(Colors.White),
+                        BorderThickness = new Thickness(0),
+                        Cursor = System.Windows.Input.Cursors.Hand,
+                        Tag = item
+                    };
+                    minusBtn.Click += MinusButton_Click;
+                    quantityPanel.Children.Add(minusBtn);
+
+                    var quantityText = new TextBlock
+                    {
+                        Text = item.Quantity.ToString(),
+                        FontSize = 18,
+                        FontWeight = FontWeights.Bold,
+                        Width = 40,
+                        TextAlignment = TextAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                    quantityPanel.Children.Add(quantityText);
+
+                    var plusBtn = new Button
+                    {
+                        Content = "+",
+                        Width = 30,
+                        Height = 30,
+                        FontSize = 18,
+                        FontWeight = FontWeights.Bold,
+                        Background = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)),
+                        Foreground = new SolidColorBrush(Colors.White),
+                        BorderThickness = new Thickness(0),
+                        Cursor = System.Windows.Input.Cursors.Hand,
+                        Tag = item
+                    };
+                    plusBtn.Click += PlusButton_Click;
+                    quantityPanel.Children.Add(plusBtn);
+
+                    rightStack.Children.Add(quantityPanel);
+
+                    // Сумма за товар
+                    rightStack.Children.Add(new TextBlock
+                    {
+                        Text = $"{item.TotalPrice:C}",
+                        FontSize = 20,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)),
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    });
+
+                    // Удалить
+                    var removeBtn = new Button
+                    {
+                        Content = "✕ Удалить",
+                        Background = new SolidColorBrush(Color.FromRgb(0xff, 0x44, 0x44)),
+                        Foreground = new SolidColorBrush(Colors.White),
+                        FontSize = 14,
+                        BorderThickness = new Thickness(0),
+                        Cursor = System.Windows.Input.Cursors.Hand,
+                        Padding = new Thickness(10, 5, 10, 5),
+                        Margin = new Thickness(0, 10, 0, 0),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Tag = item
+                    };
+                    removeBtn.Click += RemoveButton_Click;
+                    rightStack.Children.Add(removeBtn);
+
+                    Grid.SetColumn(rightStack, 2);
+                    grid.Children.Add(rightStack);
+
+                    border.Child = grid;
+                    CartItemsPanel.Children.Add(border);
+                }
+            }
+
+            UpdateTotals();
+        }
+
+        private void MinusButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is CartItem item)
+            {
+                if (item.Quantity > 1)
+                {
+                    item.Quantity--;
+                }
+                else
+                {
+                    _mainVm.CartItems.Remove(item);
+                }
+                RefreshCart();
+            }
+        }
+
+        private void RemoveButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is CartItem item)
+            {
+                _mainVm.CartItems.Remove(item);
+                RefreshCart();
+            }
+        }
+
+        private void UpdateTotals()
+        {
+            var total = _mainVm.CartItems.Sum(i => i.TotalPrice);
+            var count = _mainVm.CartItems.Sum(i => i.Quantity);
+
+            TotalAmountText.Text = $"{total:C}";
+            TotalCountText.Text = count.ToString();
+        }
+
+        private void ClearCartButton_Click(object sender, RoutedEventArgs e)
+        {
+            _mainVm.CartItems.Clear();
+            RefreshCart();
+        }
+
+        private void CheckoutButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_mainVm.CartItems.Any())
+            {
+                MessageBox.Show("Корзина пуста!", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var checkoutWindow = new CheckoutWindow(_mainVm);
+            checkoutWindow.Owner = this;
+            checkoutWindow.ShowDialog();
+            RefreshCart();
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+    }
+}
