@@ -112,7 +112,7 @@ namespace BU_Love.API.Controllers
             }
         }
 
-        // Удалить заказ (только админ)
+
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
@@ -126,7 +126,7 @@ namespace BU_Love.API.Controllers
                 if (order == null)
                     return NotFound(new { message = "Заказ не найден" });
 
-                // Возвращаем товары на склад
+
                 foreach (var item in order.Orderitems)
                 {
                     var product = await _context.Products.FindAsync(item.ProductId);
@@ -136,6 +136,15 @@ namespace BU_Love.API.Controllers
                     }
                 }
 
+
+                var orderItems = await _context.Orderitems
+                    .Where(oi => oi.OrderId == id)
+                    .ToListAsync();
+                _context.Orderitems.RemoveRange(orderItems);
+
+
+                await _context.SaveChangesAsync();
+
                 _context.Orders.Remove(order);
                 await _context.SaveChangesAsync();
 
@@ -143,7 +152,7 @@ namespace BU_Love.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = ex.Message, inner = ex.InnerException?.Message });
             }
         }
     }

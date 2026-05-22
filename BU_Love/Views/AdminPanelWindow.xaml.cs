@@ -1,10 +1,14 @@
-﻿using BU_Love.Models;
-using BU_Love.Services;
-using BU_Love.ViewModels;
-using Microsoft.Win32;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using BU_Love.Models;
+using BU_Love.Services;
+using Microsoft.Win32;
 
 namespace BU_Love.Views
 {
@@ -107,8 +111,6 @@ namespace BU_Love.Views
                 };
 
                 var mainStack = new StackPanel();
-
-                // Шапка заказа
                 var headerGrid = new Grid();
                 headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -178,20 +180,17 @@ namespace BU_Love.Views
 
                 Grid.SetColumn(priceStack, 1);
                 headerGrid.Children.Add(priceStack);
-
                 mainStack.Children.Add(headerGrid);
 
-                // Список товаров в заказе
                 if (order.Orderitems != null && order.Orderitems.Any())
                 {
-                    var itemsHeader = new TextBlock
+                    mainStack.Children.Add(new TextBlock
                     {
                         Text = "Товары:",
                         FontSize = 16,
                         FontWeight = FontWeights.Bold,
                         Margin = new Thickness(0, 15, 0, 5)
-                    };
-                    mainStack.Children.Add(itemsHeader);
+                    });
 
                     foreach (var item in order.Orderitems)
                     {
@@ -224,16 +223,22 @@ namespace BU_Love.Views
                         Grid.SetColumn(itemInfo, 0);
                         itemGrid.Children.Add(itemInfo);
 
-                        var itemPrice = new TextBlock
+                        Grid.SetColumn(new TextBlock
                         {
                             Text = $"{item.Price:C}",
                             FontSize = 16,
                             FontWeight = FontWeights.Bold,
                             Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)),
                             VerticalAlignment = VerticalAlignment.Center
-                        };
-                        Grid.SetColumn(itemPrice, 1);
-                        itemGrid.Children.Add(itemPrice);
+                        }, 1);
+                        itemGrid.Children.Add(new TextBlock
+                        {
+                            Text = $"{item.Price:C}",
+                            FontSize = 16,
+                            FontWeight = FontWeights.Bold,
+                            Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)),
+                            VerticalAlignment = VerticalAlignment.Center
+                        });
 
                         itemBorder.Child = itemGrid;
                         mainStack.Children.Add(itemBorder);
@@ -249,11 +254,8 @@ namespace BU_Love.Views
         {
             if (sender is Button btn && btn.Tag is int orderId)
             {
-                var result = MessageBox.Show(
-                    $"Удалить заказ №{orderId}?\nТовары будут возвращены на склад.",
-                    "Подтверждение",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
+                var result = MessageBox.Show($"Удалить заказ №{orderId}?\nТовары будут возвращены на склад.",
+                    "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
                 if (result == MessageBoxResult.Yes)
                 {
@@ -262,11 +264,11 @@ namespace BU_Love.Views
                         await _api.DeleteOrderAsync(orderId);
                         _orders = await _api.GetOrdersAsync();
                         ShowOrders();
-                        MessageBox.Show("Заказ удален!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("Заказ удален!", "Успех");
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show($"Ошибка удаления: {ex.Message}");
                     }
                 }
             }
@@ -290,15 +292,16 @@ namespace BU_Love.Views
         {
             _editingProductId = 0;
             _productImageUrl = "";
-            ProductFormTitle.Text = "Добавление товара";
+            ProductFormTitle.Text = "➕ ДОБАВЛЕНИЕ ТОВАРА";
             ProductName.Text = "";
             ProductDesc.Text = "";
             ProductPrice.Text = "";
             ProductCategory.Text = "";
             ProductStock.Text = "";
-            ProductCondition.Text = "";
+            ProductCondition.Text = "Good";
             ProductImagePath.Text = "";
             ProductForm.Visibility = Visibility.Visible;
+            CategoryForm.Visibility = Visibility.Collapsed;
         }
 
         private void EditProduct_Click(object sender, RoutedEventArgs e)
@@ -307,8 +310,8 @@ namespace BU_Love.Views
             {
                 _editingProductId = product.Id;
                 _productImageUrl = product.ImageUrl ?? "";
-                ProductFormTitle.Text = "Редактирование товара";
-                ProductName.Text = product.Name;
+                ProductFormTitle.Text = "✏️ РЕДАКТИРОВАНИЕ ТОВАРА";
+                ProductName.Text = product.Name ?? "";
                 ProductDesc.Text = product.Description ?? "";
                 ProductPrice.Text = product.Price.ToString();
                 ProductCategory.Text = product.CategoryId.ToString();
@@ -316,6 +319,7 @@ namespace BU_Love.Views
                 ProductCondition.Text = product.Condition ?? "";
                 ProductImagePath.Text = product.ImageUrl ?? "";
                 ProductForm.Visibility = Visibility.Visible;
+                CategoryForm.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -323,26 +327,22 @@ namespace BU_Love.Views
         {
             try
             {
-                // Валидация
                 if (string.IsNullOrWhiteSpace(ProductName.Text))
                 {
                     MessageBox.Show("Введите название товара", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-
-                if (!decimal.TryParse(ProductPrice.Text, out decimal price))
+                if (!decimal.TryParse(ProductPrice.Text, out decimal price) || price < 0)
                 {
                     MessageBox.Show("Введите корректную цену", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-
                 if (!int.TryParse(ProductCategory.Text, out int categoryId))
                 {
                     MessageBox.Show("Введите корректный ID категории", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-
-                if (!int.TryParse(ProductStock.Text, out int stock))
+                if (!int.TryParse(ProductStock.Text, out int stock) || stock < 0)
                 {
                     MessageBox.Show("Введите корректное количество", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
@@ -351,33 +351,28 @@ namespace BU_Love.Views
                 var product = new Product
                 {
                     Id = _editingProductId,
-                    Name = ProductName.Text,
-                    Description = ProductDesc.Text,
+                    Name = ProductName.Text.Trim(),
+                    Description = ProductDesc.Text?.Trim() ?? "",
                     Price = price,
                     CategoryId = categoryId,
                     StockQuantity = stock,
-                    Condition = ProductCondition.Text,
+                    Condition = ProductCondition.Text?.Trim() ?? "Good",
                     ImageUrl = _productImageUrl
                 };
 
                 if (_editingProductId == 0)
-                {
                     await _api.CreateProductAsync(product);
-                    MessageBox.Show("Товар добавлен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
                 else
-                {
                     await _api.UpdateProductAsync(_editingProductId, product);
-                    MessageBox.Show("Товар обновлен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
 
                 _products = await _api.GetProductsAsync();
                 RefreshProductsList();
                 ProductForm.Visibility = Visibility.Collapsed;
+                MessageBox.Show("Сохранено!", "Успех");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка");
             }
         }
 
@@ -385,39 +380,43 @@ namespace BU_Love.Views
         {
             if (sender is Button btn && btn.Tag is Product product)
             {
-                var result = MessageBox.Show($"Удалить товар \"{product.Name}\"?", "Подтверждение",
-                    MessageBoxButton.YesNo, MessageBoxImage.Warning);
-
-                if (result == MessageBoxResult.Yes)
+                if (MessageBox.Show($"Удалить товар \"{product.Name}\"?", "Подтверждение",
+                    MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
                     try
                     {
                         await _api.DeleteProductAsync(product.Id);
                         _products = await _api.GetProductsAsync();
                         RefreshProductsList();
-                        MessageBox.Show("Товар удален!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show($"Ошибка: {ex.Message}");
                     }
                 }
             }
         }
 
-        private void UploadProductImage_Click(object sender, RoutedEventArgs e)
+        private async void UploadProductImage_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new OpenFileDialog
             {
-                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif",
-                Title = "Выберите изображение"
+                Filter = "Изображения|*.jpg;*.jpeg;*.png;*.gif;*.bmp|Все файлы|*.*",
+                Title = "Выберите фото для товара"
             };
 
             if (dialog.ShowDialog() == true)
             {
-                _productImageUrl = dialog.FileName;
-                ProductImagePath.Text = System.IO.Path.GetFileName(dialog.FileName);
-                // Здесь можно добавить логику копирования файла в папку проекта
+                try
+                {
+                    var imageUrl = await _api.UploadImageAsync(dialog.FileName);
+                    _productImageUrl = imageUrl;
+                    ProductImagePath.Text = "✓ Загружено: " + imageUrl;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка загрузки фото: {ex.Message}");
+                }
             }
         }
 
@@ -426,10 +425,11 @@ namespace BU_Love.Views
         {
             _editingCategoryId = 0;
             _categoryImageUrl = "";
-            CategoryFormTitle.Text = "Добавление категории";
+            CategoryFormTitle.Text = "➕ ДОБАВЛЕНИЕ КАТЕГОРИИ";
             CategoryName.Text = "";
             CategoryImagePath.Text = "";
             CategoryForm.Visibility = Visibility.Visible;
+            ProductForm.Visibility = Visibility.Collapsed;
         }
 
         private void EditCategory_Click(object sender, RoutedEventArgs e)
@@ -438,10 +438,11 @@ namespace BU_Love.Views
             {
                 _editingCategoryId = category.Id;
                 _categoryImageUrl = category.ImageUrl ?? "";
-                CategoryFormTitle.Text = "Редактирование категории";
-                CategoryName.Text = category.Name;
+                CategoryFormTitle.Text = "✏️ РЕДАКТИРОВАНИЕ КАТЕГОРИИ";
+                CategoryName.Text = category.Name ?? "";
                 CategoryImagePath.Text = category.ImageUrl ?? "";
                 CategoryForm.Visibility = Visibility.Visible;
+                ProductForm.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -451,35 +452,30 @@ namespace BU_Love.Views
             {
                 if (string.IsNullOrWhiteSpace(CategoryName.Text))
                 {
-                    MessageBox.Show("Введите название категории", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Введите название категории");
                     return;
                 }
 
                 var category = new Category
                 {
                     Id = _editingCategoryId,
-                    Name = CategoryName.Text,
+                    Name = CategoryName.Text.Trim(),
                     ImageUrl = _categoryImageUrl
                 };
 
                 if (_editingCategoryId == 0)
-                {
                     await _api.CreateCategoryAsync(category);
-                    MessageBox.Show("Категория добавлена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
                 else
-                {
                     await _api.UpdateCategoryAsync(_editingCategoryId, category);
-                    MessageBox.Show("Категория обновлена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
 
                 _categories = await _api.GetCategoriesAsync();
                 RefreshCategoriesList();
                 CategoryForm.Visibility = Visibility.Collapsed;
+                MessageBox.Show("Сохранено!", "Успех");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
 
@@ -487,38 +483,43 @@ namespace BU_Love.Views
         {
             if (sender is Button btn && btn.Tag is Category category)
             {
-                var result = MessageBox.Show($"Удалить категорию \"{category.Name}\"?\nТовары в этой категории останутся без категории.",
-                    "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-
-                if (result == MessageBoxResult.Yes)
+                if (MessageBox.Show($"Удалить категорию \"{category.Name}\"?",
+                    "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
                     try
                     {
                         await _api.DeleteCategoryAsync(category.Id);
                         _categories = await _api.GetCategoriesAsync();
                         RefreshCategoriesList();
-                        MessageBox.Show("Категория удалена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show($"Ошибка: {ex.Message}");
                     }
                 }
             }
         }
 
-        private void UploadCategoryImage_Click(object sender, RoutedEventArgs e)
+        private async void UploadCategoryImage_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new OpenFileDialog
             {
-                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif",
-                Title = "Выберите изображение"
+                Filter = "Изображения|*.jpg;*.jpeg;*.png;*.gif;*.bmp|Все файлы|*.*",
+                Title = "Выберите фото для категории"
             };
 
             if (dialog.ShowDialog() == true)
             {
-                _categoryImageUrl = dialog.FileName;
-                CategoryImagePath.Text = System.IO.Path.GetFileName(dialog.FileName);
+                try
+                {
+                    var imageUrl = await _api.UploadImageAsync(dialog.FileName);
+                    _categoryImageUrl = imageUrl;
+                    CategoryImagePath.Text = "✓ Загружено: " + imageUrl;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка загрузки фото: {ex.Message}");
+                }
             }
         }
 

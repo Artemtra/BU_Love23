@@ -40,7 +40,7 @@ namespace BU_Love.ViewModels
             CancelCommand = new RelayCommand(CancelEdit);
         }
 
-        // Свойства
+
         public ObservableCollection<Product> Products
         {
             get => _products;
@@ -97,7 +97,7 @@ namespace BU_Love.ViewModels
         }
 
 
-        // Команды
+
         public ICommand LoadDataCommand { get; }
         public ICommand AddProductCommand { get; }
         public ICommand EditProductCommand { get; }
@@ -129,7 +129,7 @@ namespace BU_Love.ViewModels
             }
         }
 
-        // === ПРОДУКТЫ ===
+
         private void StartAddProduct()
         {
             SelectedProduct = new Product
@@ -155,7 +155,7 @@ private void StartEditProduct(Product product)
         return;
     }
     
-    // Создаем копию товара для редактирования
+
     SelectedProduct = new Product
     {
         Id = product.Id,
@@ -172,7 +172,7 @@ private void StartEditProduct(Product product)
     IsEditingProduct = true;
     IsEditingCategory = false;
     
-    // Принудительно обновляем UI
+
     OnPropertyChanged(nameof(SelectedProduct));
 }
 
@@ -236,7 +236,6 @@ private void StartEditProduct(Product product)
         }
 
 
-        // === КАТЕГОРИИ ===
         private void StartAddCategory()
         {
             SelectedCategory = new Category();
@@ -277,7 +276,6 @@ private void StartEditProduct(Product product)
 
             try
             {
-                // Если нет картинки, ставим заглушку
                 if (string.IsNullOrEmpty(SelectedCategory.ImageUrl))
                 {
                     SelectedCategory.ImageUrl = "/uploads/default.png";
@@ -306,7 +304,6 @@ private void StartEditProduct(Product product)
       
 
 
-        // === ЗАГРУЗКА ФОТО ===
         private async Task UploadImage()
         {
             var dialog = new OpenFileDialog

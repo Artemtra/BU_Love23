@@ -51,7 +51,6 @@ namespace BU_Love.Services
             response.EnsureSuccessStatusCode();
         }
 
-        // CRUD для категорий
         public async Task<Category> CreateCategoryAsync(Category category)
         {
             var response = await _httpClient.PostAsJsonAsync("api/categories", category);

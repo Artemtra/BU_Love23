@@ -72,7 +72,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// јвтоматическое создание базы данных при запуске
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<BuLoveDbContext>();
