@@ -16,6 +16,8 @@ namespace BU_Love.API.Controllers
         {
             _context = context;
         }
+
+        // Создать заказ (доступно всем)
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] CreateOrderDto orderDto)
         {
@@ -30,18 +32,14 @@ namespace BU_Love.API.Controllers
                 if (orderDto.Items == null || !orderDto.Items.Any())
                     return BadRequest("Корзина пуста");
 
-                // Проверяем наличие товаров и обновляем остатки
+                // Проверяем наличие товаров
                 foreach (var item in orderDto.Items)
                 {
                     var product = await _context.Products.FindAsync(item.ProductId);
-
                     if (product == null)
                         return BadRequest($"Товар с ID {item.ProductId} не найден");
-
                     if (product.StockQuantity < item.Quantity)
-                        return BadRequest($"Недостаточно товара \"{product.Name}\". В наличии: {product.StockQuantity}, запрошено: {item.Quantity}");
-
-                    // Уменьшаем количество на складе
+                        return BadRequest($"Недостаточно товара \"{product.Name}\". В наличии: {product.StockQuantity}");
                     product.StockQuantity -= item.Quantity;
                 }
 
@@ -63,56 +61,90 @@ namespace BU_Love.API.Controllers
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
 
-                return Ok(new
-                {
-                    OrderId = order.Id,
-                    TotalAmount = order.TotalAmount,
-                    Message = "Заказ успешно оформлен!"
-                });
+                return Ok(new { OrderId = order.Id, TotalAmount = order.TotalAmount });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message, inner = ex.InnerException?.Message });
+                return StatusCode(500, new { message = ex.Message });
             }
         }
-        
 
+        // Получить все заказы (только админ)
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
-            var orders = await _context.Orders
-                .Include(o => o.Orderitems)
-                .ThenInclude(oi => oi.Product)
-                .OrderByDescending(o => o.OrderDate)
-                .Select(o => new OrderResponseDto
-                {
-                    Id = o.Id,
-                    CustomerName = o.CustomerName ?? "",
-                    Phone = o.Phone ?? "",
-                    Address = o.Address ?? "",
-                    TotalAmount = o.TotalAmount,
-                    OrderDate = o.OrderDate,
-                    ItemsCount = o.Orderitems.Count
-                })
-                .ToListAsync();
-
-            return Ok(orders);
+            try
+            {
+                var orders = await _context.Orders
+                    .Include(o => o.Orderitems)
+                    .ThenInclude(oi => oi.Product)
+                    .OrderByDescending(o => o.OrderDate)
+                    .ToListAsync();
+                return Ok(orders);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
+        // Получить заказ по ID (только админ)
         [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(int id)
         {
-            var order = await _context.Orders
-                .Include(o => o.Orderitems)
-                .ThenInclude(oi => oi.Product)
-                .FirstOrDefaultAsync(o => o.Id == id);
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.Orderitems)
+                    .ThenInclude(oi => oi.Product)
+                    .FirstOrDefaultAsync(o => o.Id == id);
 
-            if (order == null)
-                return NotFound();
+                if (order == null)
+                    return NotFound(new { message = "Заказ не найден" });
 
-            return Ok(order);
+                return Ok(order);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        // Удалить заказ (только админ)
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.Orderitems)
+                    .FirstOrDefaultAsync(o => o.Id == id);
+
+                if (order == null)
+                    return NotFound(new { message = "Заказ не найден" });
+
+                // Возвращаем товары на склад
+                foreach (var item in order.Orderitems)
+                {
+                    var product = await _context.Products.FindAsync(item.ProductId);
+                    if (product != null)
+                    {
+                        product.StockQuantity += (int)item.Quantity;
+                    }
+                }
+
+                _context.Orders.Remove(order);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Заказ удален, товары возвращены на склад" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
     }
 }

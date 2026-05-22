@@ -1,9 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.37216.2 d17.14
+VisualStudioVersion = 17.14.37216.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BU_Love", "BU_Love\BU_Love.csproj", "{BC76A71B-7E06-4852-96C1-058A21DFECD7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FC33D1A6-84E7-48CE-9E9B-8A3F55863940} = {FC33D1A6-84E7-48CE-9E9B-8A3F55863940}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BU_Love.API", "BU_Love.API\BU_Love.API.csproj", "{FC33D1A6-84E7-48CE-9E9B-8A3F55863940}"
 EndProject

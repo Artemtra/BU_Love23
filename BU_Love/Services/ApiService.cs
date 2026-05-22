@@ -9,7 +9,7 @@ using BU_Love.Models;
 
 namespace BU_Love.Services
 {
-    public class ApiService  // Добавь public
+    public class ApiService  
     {
         private readonly HttpClient _httpClient;
 
@@ -32,9 +32,44 @@ namespace BU_Love.Services
                 new AuthenticationHeaderValue("Bearer", token);
         }
 
-        // ==========================================
-        // АВТОРИЗАЦИЯ
-        // ==========================================
+        public async Task<Product> CreateProductAsync(Product product)
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/products", product);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<Product>();
+        }
+
+        public async Task UpdateProductAsync(int id, Product product)
+        {
+            var response = await _httpClient.PutAsJsonAsync($"api/products/{id}", product);
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task DeleteProductAsync(int id)
+        {
+            var response = await _httpClient.DeleteAsync($"api/products/{id}");
+            response.EnsureSuccessStatusCode();
+        }
+
+        // CRUD для категорий
+        public async Task<Category> CreateCategoryAsync(Category category)
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/categories", category);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<Category>();
+        }
+
+        public async Task UpdateCategoryAsync(int id, Category category)
+        {
+            var response = await _httpClient.PutAsJsonAsync($"api/categories/{id}", category);
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task DeleteCategoryAsync(int id)
+        {
+            var response = await _httpClient.DeleteAsync($"api/categories/{id}");
+            response.EnsureSuccessStatusCode();
+        }
         public async Task<(string token, string role)> LoginAsync(string username, string password)
         {
             var response = await _httpClient.PostAsJsonAsync("api/auth/login",
@@ -51,9 +86,6 @@ namespace BU_Love.Services
             return (result.Token, result.Role);
         }
 
-        // ==========================================
-        // КАТЕГОРИИ
-        // ==========================================
         public async Task<List<Category>> GetCategoriesAsync()
         {
             var response = await _httpClient.GetAsync("api/categories");
@@ -61,44 +93,7 @@ namespace BU_Love.Services
             return await response.Content.ReadFromJsonAsync<List<Category>>();
         }
 
-        public async Task<Category> CreateCategoryAsync(Category category)
-        {
-            var response = await _httpClient.PostAsJsonAsync("api/categories", category);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Ошибка создания категории: {response.StatusCode} - {error}");
-            }
-
-            return await response.Content.ReadFromJsonAsync<Category>();
-        }
-
-        public async Task UpdateCategoryAsync(int id, Category category)
-        {
-            var response = await _httpClient.PutAsJsonAsync($"api/categories/{id}", category);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Ошибка обновления категории: {response.StatusCode} - {error}");
-            }
-        }
-
-        public async Task DeleteCategoryAsync(int id)
-        {
-            var response = await _httpClient.DeleteAsync($"api/categories/{id}");
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Ошибка удаления категории: {response.StatusCode} - {error}");
-            }
-        }
-
-        // ==========================================
-        // ТОВАРЫ
-        // ==========================================
+       
         public async Task<List<Product>> GetProductsAsync(int? categoryId = null)
         {
             var url = categoryId.HasValue
@@ -110,57 +105,20 @@ namespace BU_Love.Services
             return await response.Content.ReadFromJsonAsync<List<Product>>();
         }
 
-        public async Task<Product> CreateProductAsync(Product product)
+
+
+       
+
+        public async Task DeleteOrderAsync(int orderId)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/products", product);
+            var response = await _httpClient.DeleteAsync($"api/orders/{orderId}");
 
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Ошибка создания товара: {response.StatusCode} - {error}");
-            }
-
-            return await response.Content.ReadFromJsonAsync<Product>();
-        }
-
-        public async Task UpdateProductAsync(int id, Product product)
-        {
-            var response = await _httpClient.PutAsJsonAsync($"api/products/{id}", product);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Ошибка обновления товара: {response.StatusCode} - {error}");
+                throw new Exception($"Ошибка удаления заказа: {response.StatusCode} - {error}");
             }
         }
-
-        public async Task DeleteProductAsync(int id)
-        {
-            var response = await _httpClient.DeleteAsync($"api/products/{id}");
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Ошибка удаления товара: {response.StatusCode} - {error}");
-            }
-        }
-
-        // ==========================================
-        // ЗАКАЗЫ
-        // ==========================================
-        public async Task<List<Order>> GetOrdersAsync()
-        {
-            var response = await _httpClient.GetAsync("api/orders");
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Ошибка загрузки заказов: {response.StatusCode} - {error}");
-            }
-
-            return await response.Content.ReadFromJsonAsync<List<Order>>();
-        }
-        
         public async Task<int> CreateOrderAsync(string customerName, string phone,
             string address, List<CartItem> items)
         {
@@ -188,6 +146,20 @@ namespace BU_Love.Services
             var result = await response.Content.ReadFromJsonAsync<OrderResult>();
             return result.OrderId;
         }
+        public async Task<List<Order>> GetOrdersAsync()
+        {
+            var response = await _httpClient.GetAsync("api/orders");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Ошибка загрузки заказов: {response.StatusCode} - {error}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<List<Order>>();
+        }
+
+
         public async Task<string> UploadImageAsync(string filePath)
         {
             using var form = new MultipartFormDataContent();
@@ -209,7 +181,6 @@ namespace BU_Love.Services
             return result.ImageUrl;
         }
 
-        // Вспомогательный класс
         private class UploadResult
         {
             public string ImageUrl { get; set; } = string.Empty;
