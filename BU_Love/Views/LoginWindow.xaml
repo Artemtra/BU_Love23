@@ -49,9 +49,6 @@
                     <TextBlock Text="Пароль" Margin="0,0,0,5"/>
                     <PasswordBox x:Name="RegPassword" FontSize="16" Padding="10" 
                                  Background="#2d2d2d" Foreground="White" Margin="0,0,0,10"/>
-                    <TextBlock Text="Полное имя" Margin="0,0,0,5"/>
-                    <TextBox x:Name="RegFullName" FontSize="16" Padding="10" 
-                             Background="#2d2d2d" Foreground="White" Margin="0,0,0,10"/>
                     <TextBlock Text="Телефон" Margin="0,0,0,5"/>
                     <TextBox x:Name="RegPhone" FontSize="16" Padding="10" 
                              Background="#2d2d2d" Foreground="White" Margin="0,0,0,10"/>

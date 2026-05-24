@@ -24,6 +24,7 @@ namespace BU_Love.Views
 
         public CartWindow(MainViewModel mainViewModel)
         {
+
             InitializeComponent();
             _mainVm = mainViewModel;
             Loaded += (s, e) => RefreshCart();

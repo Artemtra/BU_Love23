@@ -6,6 +6,7 @@ using System.Windows.Media.Imaging;
 using BU_Love.Models;
 using BU_Love.Services;
 using BU_Love.Views;
+
 namespace BU_Love
 {
     public partial class MainWindow : Window
@@ -86,7 +87,6 @@ namespace BU_Love
 
         private void UpdateProfileButton()
         {
-            // Здесь можно добавить проверку авторизации
             ProfileButton.Content = "👤 ВОЙТИ";
             ProfileButton.Background = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3));
         }
