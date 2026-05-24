@@ -129,7 +129,6 @@ namespace BU_Love.Services
             {
                 Username = result.Username,
                 Role = result.Role,
-                FullName = result.FullName,
                 Phone = result.Phone,
                 Address = result.Address,
                 BonusPoints = result.BonusPoints
@@ -139,10 +138,10 @@ namespace BU_Love.Services
         }
 
         public async Task<UserProfile> RegisterAsync(string username, string password,
-            string fullName, string phone, string address)
+     string phone, string address)
         {
             var response = await _httpClient.PostAsJsonAsync("api/auth/register",
-                new { username, password, fullName, phone, address });
+                new { username, password, phone, address });
 
             if (!response.IsSuccessStatusCode)
             {
@@ -157,7 +156,6 @@ namespace BU_Love.Services
             {
                 Username = result.Username,
                 Role = result.Role,
-                FullName = result.FullName,
                 Phone = result.Phone,
                 Address = result.Address,
                 BonusPoints = result.BonusPoints
@@ -282,7 +280,6 @@ namespace BU_Love.Services
             {
                 Username = result.Username,
                 Role = result.Role,
-                FullName = result.FullName,
                 Phone = result.Phone,
                 Address = result.Address,
                 BonusPoints = result.BonusPoints

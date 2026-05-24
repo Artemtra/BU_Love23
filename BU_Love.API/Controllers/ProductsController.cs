@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BU_Love.API.Controllers
 {
+    using global::BU_Love.API.DTO;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using System;
@@ -20,6 +21,24 @@ namespace BU_Love.API.Controllers
             public ProductsController(BuLoveDbContext context)
             {
                 _context = context;
+            }
+            [HttpPost]
+            public async Task<IActionResult> CreateProduct([FromBody] ProductDto dto)
+            {
+                var product = new Product
+                {
+                    Name = dto.Name,
+                    Description = dto.Description,
+                    Price = dto.Price,
+                    CategoryId = dto.CategoryId,
+                    StockQuantity = dto.StockQuantity,
+                    Condition = dto.Condition,
+                    ImageUrl = dto.ImageUrl
+                };
+
+                _context.Products.Add(product);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
             }
 
             [HttpGet]
@@ -43,21 +62,23 @@ namespace BU_Love.API.Controllers
                 return Ok(product);
             }
 
-            [HttpPost]
-            public async Task<IActionResult> CreateProduct([FromBody] Product product)
-            {
-                _context.Products.Add(product);
-                await _context.SaveChangesAsync();
-                return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
-            }
+
 
             [HttpPut("{id}")]
-            public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product product)
+            public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductDto productDto)
             {
-                if (id != product.Id)
-                    return BadRequest();
+                var product = await _context.Products.FindAsync(id);
+                if (product == null)
+                    return NotFound();
 
-                _context.Entry(product).State = EntityState.Modified;
+                product.Name = productDto.Name;
+                product.Description = productDto.Description;
+                product.Price = productDto.Price;
+                product.CategoryId = productDto.CategoryId;
+                product.StockQuantity = productDto.StockQuantity;
+                product.Condition = productDto.Condition;
+                product.ImageUrl = productDto.ImageUrl;
+
                 await _context.SaveChangesAsync();
                 return NoContent();
             }

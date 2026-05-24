@@ -79,7 +79,7 @@ namespace BU_Love.Views
                     SubmitBtn.Content = "ВХОД...";
                     var user = await _api.LoginAsync(LoginUsername.Text.Trim(), LoginPassword.Password);
 
-                    MessageBox.Show($"Добро пожаловать, {user.FullName}!\nБонусов: {user.BonusPointsDisplay}",
+                    MessageBox.Show($"Добро пожаловать, {user.Username}!\nБонусов: {user.BonusPointsDisplay}",
                         "Успех");
 
                     DialogResult = true;
@@ -89,7 +89,6 @@ namespace BU_Love.Views
                 {
                     if (string.IsNullOrWhiteSpace(RegUsername.Text) ||
                         string.IsNullOrWhiteSpace(RegPassword.Password) ||
-                        string.IsNullOrWhiteSpace(RegFullName.Text) ||
                         string.IsNullOrWhiteSpace(RegPhone.Text) ||
                         string.IsNullOrWhiteSpace(RegAddress.Text))
                     {
@@ -99,10 +98,12 @@ namespace BU_Love.Views
 
                     SubmitBtn.Content = "РЕГИСТРАЦИЯ...";
                     var user = await _api.RegisterAsync(
-                        RegUsername.Text.Trim(), RegPassword.Password,
-                        RegFullName.Text.Trim(), RegPhone.Text.Trim(), RegAddress.Text.Trim());
+                        RegUsername.Text.Trim(),
+                        RegPassword.Password,
+                        RegPhone.Text.Trim(),
+                        RegAddress.Text.Trim());
 
-                    MessageBox.Show($"Регистрация успешна!\nДобро пожаловать, {user.FullName}!\nНачислено 100 бонусов!",
+                    MessageBox.Show($"Регистрация успешна!\nДобро пожаловать, {user.Username}!\nНачислено 100 бонусов!",
                         "Успех");
 
                     DialogResult = true;

@@ -236,7 +236,7 @@ namespace BU_Love.Views
                     CategoryId = selectedCategory.Id,
                     StockQuantity = stock,
                     Condition = selectedCondition,
-                    ImageUrl = _productImageUrl
+                    ImageUrl = _productImageUrl ?? ""
                 };
 
                 // Сохраняем

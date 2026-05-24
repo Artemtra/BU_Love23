@@ -33,7 +33,27 @@ namespace BU_Love.API.Services
             return GenerateToken(user);
         }
 
+        public async Task<AuthResponseDto> Register(RegisterDto registerDto)
+        {
+            if (await _context.Users.AnyAsync(u => u.Username == registerDto.Username))
+                throw new InvalidOperationException("Пользователь уже существует");
 
+            var user = new User
+            {
+                Username = registerDto.Username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
+                Role = "Customer",
+                Phone = registerDto.Phone,
+                Address = registerDto.Address,
+                BonusPoints = 100, // Приветственные бонусы
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return GenerateToken(user);
+        }
         private AuthResponseDto GenerateToken(DB.User user)
         {
             var claims = new[]
