@@ -9,10 +9,9 @@ using BU_Love.Models;
 
 namespace BU_Love.Services
 {
-    public class ApiService  
+    public class ApiService
     {
         private readonly HttpClient _httpClient;
-
 
         public ApiService(string baseUrl)
         {
@@ -32,6 +31,7 @@ namespace BU_Love.Services
                 new AuthenticationHeaderValue("Bearer", token);
         }
 
+        // ===== ТОВАРЫ =====
         public async Task<Product> CreateProductAsync(Product product)
         {
             var response = await _httpClient.PostAsJsonAsync("api/products", product);
@@ -51,6 +51,19 @@ namespace BU_Love.Services
             response.EnsureSuccessStatusCode();
         }
 
+        // НОВЫЙ МЕТОД: Удаление всех товаров
+        public async Task DeleteAllProductsAsync()
+        {
+            var response = await _httpClient.DeleteAsync("api/products/delete-all");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Ошибка удаления всех товаров: {response.StatusCode} - {error}");
+            }
+        }
+
+        // ===== КАТЕГОРИИ =====
         public async Task<Category> CreateCategoryAsync(Category category)
         {
             var response = await _httpClient.PostAsJsonAsync("api/categories", category);
@@ -69,6 +82,20 @@ namespace BU_Love.Services
             var response = await _httpClient.DeleteAsync($"api/categories/{id}");
             response.EnsureSuccessStatusCode();
         }
+
+        // НОВЫЙ МЕТОД: Удаление всех категорий
+        public async Task DeleteAllCategoriesAsync()
+        {
+            var response = await _httpClient.DeleteAsync("api/categories/delete-all");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Ошибка удаления всех категорий: {response.StatusCode} - {error}");
+            }
+        }
+
+        // ===== АВТОРИЗАЦИЯ =====
         public async Task<(string token, string role)> LoginAsync(string username, string password)
         {
             var response = await _httpClient.PostAsJsonAsync("api/auth/login",
@@ -85,6 +112,7 @@ namespace BU_Love.Services
             return (result.Token, result.Role);
         }
 
+        // ===== КАТЕГОРИИ (получение) =====
         public async Task<List<Category>> GetCategoriesAsync()
         {
             var response = await _httpClient.GetAsync("api/categories");
@@ -92,7 +120,7 @@ namespace BU_Love.Services
             return await response.Content.ReadFromJsonAsync<List<Category>>();
         }
 
-       
+        // ===== ТОВАРЫ (получение) =====
         public async Task<List<Product>> GetProductsAsync(int? categoryId = null)
         {
             var url = categoryId.HasValue
@@ -104,10 +132,7 @@ namespace BU_Love.Services
             return await response.Content.ReadFromJsonAsync<List<Product>>();
         }
 
-
-
-       
-
+        // ===== ЗАКАЗЫ =====
         public async Task DeleteOrderAsync(int orderId)
         {
             var response = await _httpClient.DeleteAsync($"api/orders/{orderId}");
@@ -118,6 +143,19 @@ namespace BU_Love.Services
                 throw new Exception($"Ошибка удаления заказа: {response.StatusCode} - {error}");
             }
         }
+
+        // НОВЫЙ МЕТОД: Удаление всех заказов
+        public async Task DeleteAllOrdersAsync()
+        {
+            var response = await _httpClient.DeleteAsync("api/orders/delete-all");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Ошибка удаления всех заказов: {response.StatusCode} - {error}");
+            }
+        }
+
         public async Task<int> CreateOrderAsync(string customerName, string phone,
             string address, List<CartItem> items)
         {
@@ -145,6 +183,7 @@ namespace BU_Love.Services
             var result = await response.Content.ReadFromJsonAsync<OrderResult>();
             return result.OrderId;
         }
+
         public async Task<List<Order>> GetOrdersAsync()
         {
             var response = await _httpClient.GetAsync("api/orders");
@@ -158,7 +197,7 @@ namespace BU_Love.Services
             return await response.Content.ReadFromJsonAsync<List<Order>>();
         }
 
-
+        // ===== ЗАГРУЗКА ИЗОБРАЖЕНИЙ =====
         public async Task<string> UploadImageAsync(string filePath)
         {
             using var form = new MultipartFormDataContent();
@@ -180,11 +219,13 @@ namespace BU_Love.Services
             return result.ImageUrl;
         }
 
+        // ===== ВСПОМОГАТЕЛЬНЫЕ КЛАССЫ =====
         private class UploadResult
         {
             public string ImageUrl { get; set; } = string.Empty;
             public string FileName { get; set; } = string.Empty;
         }
+
         private class LoginResult
         {
             public string Token { get; set; } = string.Empty;
@@ -197,6 +238,6 @@ namespace BU_Love.Services
             public int OrderId { get; set; }
             public decimal TotalAmount { get; set; }
         }
-
     }
+
 }

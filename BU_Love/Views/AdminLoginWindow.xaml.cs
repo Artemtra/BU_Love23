@@ -33,8 +33,8 @@ namespace BU_Love.Views
                 LoginButton.Content = "ВХОД...";
 
                 var (token, role) = await _apiService.LoginAsync(
-                    LoginBox.Text,        // TextBox - обычное свойство Text
-                    PasswordBox.Password  // PasswordBox - специальное свойство Password
+                    LoginBox.Text,        
+                    PasswordBox.Password  
                 );
 
                 if (role == "Admin")

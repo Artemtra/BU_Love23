@@ -33,6 +33,7 @@ namespace BU_Love.API.Services
             return GenerateToken(user);
         }
 
+
         private AuthResponseDto GenerateToken(DB.User user)
         {
             var claims = new[]

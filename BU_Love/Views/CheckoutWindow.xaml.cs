@@ -56,7 +56,6 @@ namespace BU_Love.Views
                 return;
             }
 
-            // Проверяем количество товаров
             foreach (var item in _mainViewModel.CartItems)
             {
                 if (item.Quantity > item.Product.StockQuantity)

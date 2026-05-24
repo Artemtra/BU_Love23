@@ -44,7 +44,7 @@ namespace BU_Love.Views
 
                 foreach (var product in products)
                 {
-                    // Создаем карточку товара
+
                     var border = new Border
                     {
                         Width = 300,
@@ -60,7 +60,6 @@ namespace BU_Love.Views
 
                     var stack = new StackPanel();
 
-                    // Картинка товара
                     var image = new Image
                     {
                         Width = 200,
@@ -69,7 +68,6 @@ namespace BU_Love.Views
                         Margin = new Thickness(0, 0, 0, 15)
                     };
 
-                    // Загружаем картинку из API
                     if (!string.IsNullOrEmpty(product.ImageUrl))
                     {
                         try
@@ -82,7 +80,6 @@ namespace BU_Love.Views
 
                     stack.Children.Add(image);
 
-                    // Название
                     stack.Children.Add(new TextBlock
                     {
                         Text = product.Name,
@@ -92,7 +89,6 @@ namespace BU_Love.Views
                         Margin = new Thickness(0, 0, 0, 5)
                     });
 
-                    // Описание
                     stack.Children.Add(new TextBlock
                     {
                         Text = product.Description,
@@ -103,7 +99,6 @@ namespace BU_Love.Views
                         Margin = new Thickness(0, 0, 0, 10)
                     });
 
-                    // Цена
                     stack.Children.Add(new TextBlock
                     {
                         Text = $"{product.Price:C}",
@@ -115,7 +110,6 @@ namespace BU_Love.Views
                         HorizontalAlignment = HorizontalAlignment.Center
                     });
 
-                    // Кнопка "В корзину"
                     var button = new Button
                     {
                         Content = "🛒 В КОРЗИНУ",

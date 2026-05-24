@@ -32,7 +32,6 @@ namespace BU_Love.Views
         {
             if (sender is Button btn && btn.Tag is CartItem item)
             {
-                // Проверяем, не превышает ли количество остаток на складе
                 if (item.Quantity + 1 > item.Product.StockQuantity)
                 {
                     MessageBox.Show(
@@ -79,7 +78,7 @@ namespace BU_Love.Views
                     grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                     grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(200) });
 
-                    // Картинка товара
+
                     var image = new Image
                     {
                         Width = 80,
@@ -99,14 +98,14 @@ namespace BU_Love.Views
                     }
                     else
                     {
-                        // Заглушка если нет картинки
+                        
                         image.Source = new BitmapImage(new Uri("https://via.placeholder.com/80"));
                     }
 
                     Grid.SetColumn(image, 0);
                     grid.Children.Add(image);
 
-                    // Информация о товаре
+
                     var infoStack = new StackPanel
                     {
                         VerticalAlignment = VerticalAlignment.Center,
@@ -139,14 +138,13 @@ namespace BU_Love.Views
                     Grid.SetColumn(infoStack, 1);
                     grid.Children.Add(infoStack);
 
-                    // Количество и сумма
+
                     var rightStack = new StackPanel
                     {
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = HorizontalAlignment.Right
                     };
 
-                    // Кнопки +/-
                     var quantityPanel = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,
@@ -199,7 +197,6 @@ namespace BU_Love.Views
 
                     rightStack.Children.Add(quantityPanel);
 
-                    // Сумма за товар
                     rightStack.Children.Add(new TextBlock
                     {
                         Text = $"{item.TotalPrice:C}",
@@ -209,7 +206,6 @@ namespace BU_Love.Views
                         HorizontalAlignment = HorizontalAlignment.Center
                     });
 
-                    // Удалить
                     var removeBtn = new Button
                     {
                         Content = "✕ Удалить",

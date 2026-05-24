@@ -112,6 +112,27 @@ namespace BU_Love.API.Controllers
             }
         }
 
+        [HttpDelete("delete-all")]
+        public async Task<IActionResult> DeleteAllOrders()
+        {
+            try
+            {
+                // Сначала удаляем все позиции заказов
+                var allOrderItems = await _context.Orderitems.ToListAsync();
+                _context.Orderitems.RemoveRange(allOrderItems);
+
+                // Затем удаляем все заказы
+                var allOrders = await _context.Orders.ToListAsync();
+                _context.Orders.RemoveRange(allOrders);
+
+                await _context.SaveChangesAsync();
+                return Ok(new { message = $"Удалено заказов: {allOrders.Count}" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Ошибка удаления: {ex.Message}" });
+            }
+        }
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]

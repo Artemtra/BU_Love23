@@ -7,6 +7,7 @@ namespace BU_Love.API.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
+    using System;
 
     namespace BU_Love.API.Controllers
     {
@@ -24,97 +25,99 @@ namespace BU_Love.API.Controllers
             [HttpGet]
             public async Task<IActionResult> GetProducts([FromQuery] int? categoryId)
             {
-                try
-                {
-                    var query = _context.Products.AsQueryable();
+                var query = _context.Products.AsQueryable();
 
-                    if (categoryId.HasValue && categoryId.Value > 0)
-                    {
-                        query = query.Where(p => p.CategoryId == categoryId.Value);
-                    }
+                if (categoryId.HasValue)
+                    query = query.Where(p => p.CategoryId == categoryId.Value);
 
-                    var products = await query.ToListAsync();
-                    return Ok(products);
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, new { message = ex.Message, stack = ex.StackTrace });
-                }
+                var products = await query.ToListAsync();
+                return Ok(products);
             }
 
             [HttpGet("{id}")]
             public async Task<IActionResult> GetProduct(int id)
             {
-                try
-                {
-                    var product = await _context.Products.FindAsync(id);
-                    if (product == null)
-                        return NotFound(new { message = $"Товар с ID {id} не найден" });
-                    return Ok(product);
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, new { message = ex.Message });
-                }
+                var product = await _context.Products.FindAsync(id);
+                if (product == null)
+                    return NotFound();
+                return Ok(product);
             }
 
             [HttpPost]
-            public async Task<IActionResult> Create([FromBody] Product product)
+            public async Task<IActionResult> CreateProduct([FromBody] Product product)
             {
-                try
-                {
-                    _context.Products.Add(product);
-                    await _context.SaveChangesAsync();
-                    return Ok(product);
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, new { message = ex.Message, inner = ex.InnerException?.Message });
-                }
+                _context.Products.Add(product);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
             }
 
             [HttpPut("{id}")]
-            public async Task<IActionResult> Update(int id, [FromBody] Product product)
+            public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product product)
             {
-                try
-                {
-                    var existing = await _context.Products.FindAsync(id);
-                    if (existing == null)
-                        return NotFound(new { message = "Товар не найден" });
+                if (id != product.Id)
+                    return BadRequest();
 
-                    existing.Name = product.Name;
-                    existing.Description = product.Description;
-                    existing.Price = product.Price;
-                    existing.CategoryId = product.CategoryId;
-                    existing.StockQuantity = product.StockQuantity;
-                    existing.Condition = product.Condition;
-                    existing.ImageUrl = product.ImageUrl;
-
-                    await _context.SaveChangesAsync();
-                    return Ok(existing);
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, new { message = ex.Message });
-                }
+                _context.Entry(product).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+                return NoContent();
             }
 
             [HttpDelete("{id}")]
-            public async Task<IActionResult> Delete(int id)
+            public async Task<IActionResult> DeleteProduct(int id)
             {
+                var product = await _context.Products.FindAsync(id);
+                if (product == null)
+                    return NotFound();
+
+                _context.Products.Remove(product);
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            [HttpDelete("delete-all")]
+            public async Task<IActionResult> DeleteAllProducts()
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync();
+
                 try
                 {
-                    var product = await _context.Products.FindAsync(id);
-                    if (product == null)
-                        return NotFound();
+                    // Отключаем внешние ключи, чтобы не мешали
+                    await _context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 0");
 
-                    _context.Products.Remove(product);
+                    // Обнуляем ProductId в OrderItems, чтобы сохранить историю заказов
+                    // но убрать связь с удаляемыми товарами
+                    await _context.Database.ExecuteSqlRawAsync(
+                        "UPDATE OrderItems SET ProductId = NULL WHERE ProductId IS NOT NULL");
+
+                    // Удаляем все товары
+                    var allProducts = await _context.Products.ToListAsync();
+
+                    if (!allProducts.Any())
+                    {
+                        await _context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 1");
+                        await transaction.CommitAsync();
+                        return Ok(new { message = "Нет товаров для удаления" });
+                    }
+
+                    _context.Products.RemoveRange(allProducts);
                     await _context.SaveChangesAsync();
-                    return Ok();
+
+                    // Включаем обратно внешние ключи
+                    await _context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 1");
+
+                    // Сбрасываем автоинкремент
+                    await _context.Database.ExecuteSqlRawAsync("ALTER TABLE Products AUTO_INCREMENT = 1");
+
+                    await transaction.CommitAsync();
+
+                    return Ok(new { message = $"Удалено товаров: {allProducts.Count}. История заказов сохранена." });
                 }
                 catch (Exception ex)
                 {
-                    return StatusCode(500, new { message = ex.Message });
+                    await transaction.RollbackAsync();
+                    await _context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 1");
+
+                    var innerException = ex.InnerException?.Message ?? ex.Message;
+                    return StatusCode(500, new { message = $"Ошибка удаления всех товаров: {innerException}" });
                 }
             }
         }
