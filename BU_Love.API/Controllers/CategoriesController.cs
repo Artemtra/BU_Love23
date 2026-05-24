@@ -89,8 +89,8 @@ namespace BU_Love.API.Controllers
 
                 // Сохраняем ID товаров для истории заказов
                 var productIds = productsToDelete.Select(p => p.Id).ToList();
-
-                // Обновляем OrderItems - сохраняем информацию о товаре, но убираем связь
+                
+                //Обновляем OrderItems - сохраняем информацию о товаре, но убираем связь
                 var orderItems = await _context.Orderitems
                     .Where(oi => oi.ProductId.HasValue && productIds.Contains(oi.ProductId.Value))
                     .ToListAsync();

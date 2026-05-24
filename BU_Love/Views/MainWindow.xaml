@@ -43,7 +43,9 @@
                             </Style>
                         </Button.Style>
                     </Button>
-
+                    <Button x:Name="ProfileButton" Content="👤 ВОЙТИ" Click="ProfileButton_Click"
+                            Background="#4CAF50" Foreground="White" FontSize="18" FontWeight="Bold"
+                            Padding="25,12" BorderThickness="0" Cursor="Hand" Margin="0,0,15,0"/>
                     <Button Content="🛒 КОРЗИНА" Click="CartButton_Click"
                             Background="#2196F3" Foreground="White" FontSize="18" FontWeight="Bold"
                             Padding="25,12" BorderThickness="0" Cursor="Hand" Margin="0,0,15,0"/>

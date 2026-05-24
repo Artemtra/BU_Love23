@@ -1,21 +1,13 @@
-﻿using BU_Love.Models;
-using BU_Love.Views;
-using System.Text;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
+using BU_Love.Models;
+using BU_Love.Services;
+using BU_Love.Views;
 namespace BU_Love
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         private MainViewModel _viewModel;
@@ -24,12 +16,14 @@ namespace BU_Love
         public MainWindow()
         {
             InitializeComponent();
+
             _viewModel = new MainViewModel();
             DataContext = _viewModel;
 
             Loaded += async (s, e) =>
             {
                 await LoadDataAsync();
+                UpdateProfileButton();
             };
         }
 
@@ -37,7 +31,6 @@ namespace BU_Love
         {
             try
             {
-                // Показываем индикатор загрузки
                 LoadingOverlay.Visibility = Visibility.Visible;
                 RefreshButton.IsEnabled = false;
 
@@ -45,7 +38,6 @@ namespace BU_Love
                 ShowCategories();
                 UpdateCartInfo();
 
-                // Обновляем время последнего обновления
                 _lastUpdateTime = DateTime.Now;
                 UpdateInfo.Text = $"Последнее обновление: {_lastUpdateTime:HH:mm:ss}";
             }
@@ -57,7 +49,6 @@ namespace BU_Love
             }
             finally
             {
-                // Скрываем индикатор загрузки
                 LoadingOverlay.Visibility = Visibility.Collapsed;
                 RefreshButton.IsEnabled = true;
             }
@@ -67,7 +58,6 @@ namespace BU_Love
         {
             await LoadDataAsync();
 
-            // Анимация кнопки обновления
             RefreshButton.Content = "✓ Обновлено";
             var timer = new System.Windows.Threading.DispatcherTimer
             {
@@ -81,6 +71,26 @@ namespace BU_Love
             timer.Start();
         }
 
+        private void ProfileButton_Click(object sender, RoutedEventArgs e)
+        {
+            var api = new ApiService("http://localhost:5000");
+            var loginWindow = new LoginWindow(api);
+            loginWindow.Owner = this;
+
+            if (loginWindow.ShowDialog() == true)
+            {
+                UpdateProfileButton();
+                UpdateCartInfo();
+            }
+        }
+
+        private void UpdateProfileButton()
+        {
+            // Здесь можно добавить проверку авторизации
+            ProfileButton.Content = "👤 ВОЙТИ";
+            ProfileButton.Background = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3));
+        }
+
         private void CartButton_Click(object sender, RoutedEventArgs e)
         {
             var cartWindow = new CartWindow(_viewModel);
@@ -91,14 +101,12 @@ namespace BU_Love
 
         private void AdminButton_Click(object sender, RoutedEventArgs e)
         {
-            var api = new BU_Love.Services.ApiService("http://localhost:5000");
+            var api = new ApiService("http://localhost:5000");
             var loginWindow = new AdminLoginWindow(api);
             loginWindow.Owner = this;
 
-            // Подписываемся на событие закрытия окна администратора
             loginWindow.Closed += async (s, args) =>
             {
-                // Обновляем данные после выхода из админ-панели
                 await LoadDataAsync();
             };
 
@@ -121,7 +129,6 @@ namespace BU_Love
 
             if (_viewModel.Categories == null || _viewModel.Categories.Count == 0)
             {
-                // Если категорий нет, показываем сообщение
                 var noDataText = new TextBlock
                 {
                     Text = "📭 Нет доступных категорий\nНажмите 'Обновить' для загрузки",
@@ -148,7 +155,6 @@ namespace BU_Love
                     Tag = category
                 };
 
-                // Добавляем эффекты при наведении
                 button.MouseEnter += (s, e) =>
                 {
                     button.BorderBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0x98, 0x00));
@@ -168,7 +174,6 @@ namespace BU_Love
                     HorizontalAlignment = HorizontalAlignment.Center
                 };
 
-                // Иконка категории (эмодзи вместо изображения, если нет картинки)
                 var emojiText = GetCategoryEmoji(category.Name);
                 var emojiBlock = new TextBlock
                 {
@@ -179,7 +184,6 @@ namespace BU_Love
                 };
                 stack.Children.Add(emojiBlock);
 
-                // Изображение категории (если есть)
                 if (!string.IsNullOrEmpty(category.ImageUrl))
                 {
                     try
@@ -195,14 +199,10 @@ namespace BU_Love
                         var imageUrl = "http://localhost:5000" + category.ImageUrl;
                         image.Source = new BitmapImage(new Uri(imageUrl, UriKind.Absolute));
 
-                        // Заменяем эмодзи на изображение
                         stack.Children.Remove(emojiBlock);
                         stack.Children.Insert(0, image);
                     }
-                    catch
-                    {
-                        // Оставляем эмодзи, если не удалось загрузить изображение
-                    }
+                    catch { }
                 }
 
                 stack.Children.Add(new TextBlock

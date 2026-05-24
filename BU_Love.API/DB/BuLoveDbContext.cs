@@ -28,7 +28,7 @@ public partial class BuLoveDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("userid=root;password=11111123;database=bu_love_db;server=localhost", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.46-mysql"));
+        => optionsBuilder.UseMySql("server=localhost;database=bu_love_db;user=root;password=11111123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.46-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -84,7 +84,6 @@ public partial class BuLoveDbContext : DbContext
 
             entity.HasOne(d => d.Product).WithMany(p => p.Orderitems)
                 .HasForeignKey(d => d.ProductId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_orderitems_products_Id");
         });
 
@@ -116,7 +115,10 @@ public partial class BuLoveDbContext : DbContext
 
             entity.ToTable("users");
 
+            entity.Property(e => e.Address).HasMaxLength(255);
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
+            entity.Property(e => e.Phone).HasMaxLength(255);
             entity.Property(e => e.Role)
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'Customer'");

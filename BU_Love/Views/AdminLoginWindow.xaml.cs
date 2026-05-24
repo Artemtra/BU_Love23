@@ -32,12 +32,12 @@ namespace BU_Love.Views
                 LoginButton.IsEnabled = false;
                 LoginButton.Content = "ВХОД...";
 
-                var (token, role) = await _apiService.LoginAsync(
-                    LoginBox.Text,        
-                    PasswordBox.Password  
+                var user = await _apiService.LoginAsync(
+                    LoginBox.Text,
+                    PasswordBox.Password
                 );
 
-                if (role == "Admin")
+                if (user.Role == "Admin")
                 {
                     var adminPanel = new AdminPanelWindow(_apiService);
                     adminPanel.Owner = this;
@@ -47,7 +47,7 @@ namespace BU_Love.Views
                 }
                 else
                 {
-                    MessageBox.Show("Недостаточно прав!", "Ошибка",
+                    MessageBox.Show("Недостаточно прав! Требуется роль Admin.", "Ошибка",
                         MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }

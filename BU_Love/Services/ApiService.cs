@@ -12,6 +12,15 @@ namespace BU_Love.Services
     public class ApiService
     {
         private readonly HttpClient _httpClient;
+        private UserProfile _currentUser;
+
+        public UserProfile CurrentUser
+        {
+            get => _currentUser;
+            set => _currentUser = value;
+        }
+
+        public bool IsLoggedIn => _currentUser != null;
 
         public ApiService(string baseUrl)
         {
@@ -27,8 +36,16 @@ namespace BU_Love.Services
 
         public void SetToken(string token)
         {
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
+            if (string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = null;
+                _currentUser = null;
+            }
+            else
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+            }
         }
 
         // ===== ТОВАРЫ =====
@@ -51,7 +68,6 @@ namespace BU_Love.Services
             response.EnsureSuccessStatusCode();
         }
 
-        // НОВЫЙ МЕТОД: Удаление всех товаров
         public async Task DeleteAllProductsAsync()
         {
             var response = await _httpClient.DeleteAsync("api/products/delete-all");
@@ -83,7 +99,6 @@ namespace BU_Love.Services
             response.EnsureSuccessStatusCode();
         }
 
-        // НОВЫЙ МЕТОД: Удаление всех категорий
         public async Task DeleteAllCategoriesAsync()
         {
             var response = await _httpClient.DeleteAsync("api/categories/delete-all");
@@ -96,7 +111,7 @@ namespace BU_Love.Services
         }
 
         // ===== АВТОРИЗАЦИЯ =====
-        public async Task<(string token, string role)> LoginAsync(string username, string password)
+        public async Task<UserProfile> LoginAsync(string username, string password)
         {
             var response = await _httpClient.PostAsJsonAsync("api/auth/login",
                 new { username, password });
@@ -104,12 +119,57 @@ namespace BU_Love.Services
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Ошибка входа: {response.StatusCode} - {error}");
+                throw new Exception($"Ошибка входа: {error}");
             }
 
-            var result = await response.Content.ReadFromJsonAsync<LoginResult>();
+            var result = await response.Content.ReadFromJsonAsync<AuthResult>();
             SetToken(result.Token);
-            return (result.Token, result.Role);
+
+            _currentUser = new UserProfile
+            {
+                Username = result.Username,
+                Role = result.Role,
+                FullName = result.FullName,
+                Phone = result.Phone,
+                Address = result.Address,
+                BonusPoints = result.BonusPoints
+            };
+
+            return _currentUser;
+        }
+
+        public async Task<UserProfile> RegisterAsync(string username, string password,
+            string fullName, string phone, string address)
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/auth/register",
+                new { username, password, fullName, phone, address });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Ошибка регистрации: {error}");
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<AuthResult>();
+            SetToken(result.Token);
+
+            _currentUser = new UserProfile
+            {
+                Username = result.Username,
+                Role = result.Role,
+                FullName = result.FullName,
+                Phone = result.Phone,
+                Address = result.Address,
+                BonusPoints = result.BonusPoints
+            };
+
+            return _currentUser;
+        }
+
+        public void Logout()
+        {
+            SetToken(null);
+            _currentUser = null;
         }
 
         // ===== КАТЕГОРИИ (получение) =====
@@ -144,7 +204,6 @@ namespace BU_Love.Services
             }
         }
 
-        // НОВЫЙ МЕТОД: Удаление всех заказов
         public async Task DeleteAllOrdersAsync()
         {
             var response = await _httpClient.DeleteAsync("api/orders/delete-all");
@@ -157,13 +216,16 @@ namespace BU_Love.Services
         }
 
         public async Task<int> CreateOrderAsync(string customerName, string phone,
-            string address, List<CartItem> items)
+            string address, List<CartItem> items, bool useBonusPoints = false,
+            decimal bonusPointsToUse = 0)
         {
             var orderData = new
             {
                 customerName,
                 phone,
                 address,
+                useBonusPoints,
+                bonusPointsToUse,
                 items = items.ConvertAll(i => new
                 {
                     productId = i.Product.Id,
@@ -181,6 +243,13 @@ namespace BU_Love.Services
             }
 
             var result = await response.Content.ReadFromJsonAsync<OrderResult>();
+
+            // Обновляем бонусы пользователя после заказа
+            if (IsLoggedIn)
+            {
+                await RefreshUserProfileAsync();
+            }
+
             return result.OrderId;
         }
 
@@ -197,6 +266,51 @@ namespace BU_Love.Services
             return await response.Content.ReadFromJsonAsync<List<Order>>();
         }
 
+        // ===== ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ =====
+        public async Task<UserProfile> GetProfileAsync()
+        {
+            var response = await _httpClient.GetAsync("api/auth/profile");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception("Не удалось загрузить профиль");
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<AuthResult>();
+
+            _currentUser = new UserProfile
+            {
+                Username = result.Username,
+                Role = result.Role,
+                FullName = result.FullName,
+                Phone = result.Phone,
+                Address = result.Address,
+                BonusPoints = result.BonusPoints
+            };
+
+            return _currentUser;
+        }
+
+        private async Task RefreshUserProfileAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("api/auth/profile");
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<AuthResult>();
+                    if (result != null && _currentUser != null)
+                    {
+                        _currentUser.BonusPoints = result.BonusPoints;
+                    }
+                }
+            }
+            catch
+            {
+                // Игнорируем ошибки обновления профиля
+            }
+        }
+
         // ===== ЗАГРУЗКА ИЗОБРАЖЕНИЙ =====
         public async Task<string> UploadImageAsync(string filePath)
         {
@@ -204,7 +318,7 @@ namespace BU_Love.Services
             using var fileStream = File.OpenRead(filePath);
             using var fileContent = new StreamContent(fileStream);
 
-            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
             form.Add(fileContent, "file", Path.GetFileName(filePath));
 
             var response = await _httpClient.PostAsync("api/upload", form);
@@ -226,11 +340,15 @@ namespace BU_Love.Services
             public string FileName { get; set; } = string.Empty;
         }
 
-        private class LoginResult
+        private class AuthResult
         {
             public string Token { get; set; } = string.Empty;
             public string Username { get; set; } = string.Empty;
             public string Role { get; set; } = string.Empty;
+            public string FullName { get; set; } = string.Empty;
+            public string Phone { get; set; } = string.Empty;
+            public string Address { get; set; } = string.Empty;
+            public decimal BonusPoints { get; set; }
         }
 
         private class OrderResult
@@ -239,5 +357,4 @@ namespace BU_Love.Services
             public decimal TotalAmount { get; set; }
         }
     }
-
 }

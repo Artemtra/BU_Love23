@@ -1,0 +1,78 @@
+﻿<Window x:Class="BU_Love.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Вход" Width="450" Height="650"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None" AllowsTransparency="True"
+        Background="Transparent">
+
+    <Border Background="#1a1a1a" CornerRadius="15" BorderBrush="#FF9800" BorderThickness="2">
+        <Grid Margin="30">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock x:Name="TitleText" Text="Вход" FontSize="28" FontWeight="Bold" 
+                           HorizontalAlignment="Center" Foreground="#FF9800"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1">
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="LoginTabBtn" Content="ВХОД" Click="LoginTab_Click"
+                            Background="#FF9800" Foreground="White" FontSize="16" FontWeight="Bold"
+                            Padding="10" BorderThickness="0" Cursor="Hand"/>
+                    <Button x:Name="RegisterTabBtn" Content="РЕГИСТРАЦИЯ" Click="RegisterTab_Click"
+                            Grid.Column="1" Background="#2d2d2d" Foreground="#aaaaaa" FontSize="16" 
+                            FontWeight="Bold" Padding="10" BorderThickness="0" Cursor="Hand"/>
+                </Grid>
+
+                <StackPanel x:Name="LoginPanel">
+                    <TextBlock Text="Логин" Margin="0,0,0,5"/>
+                    <TextBox x:Name="LoginUsername" FontSize="16" Padding="10" 
+                             Background="#2d2d2d" Foreground="White" Margin="0,0,0,15"/>
+                    <TextBlock Text="Пароль" Margin="0,0,0,5"/>
+                    <PasswordBox x:Name="LoginPassword" FontSize="16" Padding="10" 
+                                 Background="#2d2d2d" Foreground="White" Margin="0,0,0,20"/>
+                </StackPanel>
+
+                <StackPanel x:Name="RegisterPanel" Visibility="Collapsed">
+                    <TextBlock Text="Логин" Margin="0,0,0,5"/>
+                    <TextBox x:Name="RegUsername" FontSize="16" Padding="10" 
+                             Background="#2d2d2d" Foreground="White" Margin="0,0,0,10"/>
+                    <TextBlock Text="Пароль" Margin="0,0,0,5"/>
+                    <PasswordBox x:Name="RegPassword" FontSize="16" Padding="10" 
+                                 Background="#2d2d2d" Foreground="White" Margin="0,0,0,10"/>
+                    <TextBlock Text="Полное имя" Margin="0,0,0,5"/>
+                    <TextBox x:Name="RegFullName" FontSize="16" Padding="10" 
+                             Background="#2d2d2d" Foreground="White" Margin="0,0,0,10"/>
+                    <TextBlock Text="Телефон" Margin="0,0,0,5"/>
+                    <TextBox x:Name="RegPhone" FontSize="16" Padding="10" 
+                             Background="#2d2d2d" Foreground="White" Margin="0,0,0,10"/>
+                    <TextBlock Text="Адрес доставки" Margin="0,0,0,5"/>
+                    <TextBox x:Name="RegAddress" FontSize="16" Padding="10" 
+                             Background="#2d2d2d" Foreground="White" Height="60" 
+                             TextWrapping="Wrap" Margin="0,0,0,15"/>
+                </StackPanel>
+
+                <TextBlock x:Name="BonusInfo" Text="" FontSize="14" Foreground="#4CAF50" 
+                           TextAlignment="Center" Margin="0,10,0,0"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Margin="0,20,0,0">
+                <Button x:Name="SubmitBtn" Content="ВОЙТИ" Click="SubmitButton_Click"
+                        Background="#FF9800" Foreground="White" FontSize="18" FontWeight="Bold"
+                        Padding="15" BorderThickness="0" Cursor="Hand" Margin="0,0,0,10"/>
+                <Button Content="ОТМЕНА" Click="CancelButton_Click"
+                        Background="#ff4444" Foreground="White" FontSize="14"
+                        Padding="10" BorderThickness="0" Cursor="Hand"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
