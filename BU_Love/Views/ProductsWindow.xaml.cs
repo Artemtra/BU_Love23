@@ -22,17 +22,16 @@ namespace BU_Love.Views
     /// </summary>
     public partial class ProductsWindow : Window
     {
-        private readonly ApiService _api;
+        private readonly Category _category;
         private readonly MainViewModel _mainVm;
-        private Category _category;
+        private readonly ApiService _api;
 
-        public ProductsWindow(Category category, MainViewModel mainViewModel)
+        public ProductsWindow(Category category, MainViewModel mainViewModel, ApiService api = null)
         {
             InitializeComponent();
-            _api = new ApiService("http://localhost:5000");
-            _mainVm = mainViewModel;
             _category = category;
-            CategoryTitle.Text = category.Name;
+            _mainVm = mainViewModel;
+            _api = api;
             Loaded += async (s, e) => await LoadProducts();
         }
 
@@ -135,13 +134,12 @@ namespace BU_Love.Views
                 MessageBox.Show($"Ошибка загрузки товаров: {ex.Message}");
             }
         }
-
         private void AddToCart_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is Product product)
             {
                 _mainVm.AddToCart(product);
-                MessageBox.Show($"{product.Name} добавлен в корзину!", "Успех");
+                MessageBox.Show($"{product.Name} добавлен в корзину!", "✅ Успех");
             }
         }
 
@@ -152,7 +150,7 @@ namespace BU_Love.Views
 
         private void CartButton_Click(object sender, RoutedEventArgs e)
         {
-            var cartWindow = new CartWindow(_mainVm);
+            var cartWindow = new CartWindow(_mainVm, _api);
             cartWindow.Owner = this;
             cartWindow.ShowDialog();
         }

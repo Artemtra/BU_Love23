@@ -1,106 +1,152 @@
 ﻿using BU_Love.Models;
+using BU_Love.Services;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace BU_Love.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для CheckoutWindow.xaml
-    /// </summary>
     public partial class CheckoutWindow : Window
     {
-        private readonly MainViewModel _mainViewModel;
+        private readonly MainViewModel _mainVm;
+        private readonly ApiService _api;
+        private bool _isLoggedIn;
+        private decimal _totalAmount;
 
-        public CheckoutWindow(MainViewModel mainViewModel)
+        public CheckoutWindow(MainViewModel mainViewModel, ApiService api = null)
         {
             InitializeComponent();
-            _mainViewModel = mainViewModel;
-            DataContext = _mainViewModel;
+            _mainVm = mainViewModel;
+            _api = api;
+            Loaded += (s, e) => LoadCheckout();
         }
 
-        private void BackButton_Click(object sender, RoutedEventArgs e)
+        private void LoadCheckout()
         {
-            Close();
-        }
-        private async void SubmitButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(NameBox.Text))
-            {
-                MessageBox.Show("Введите имя!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(PhoneBox.Text))
-            {
-                MessageBox.Show("Введите телефон!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(AddressBox.Text))
-            {
-                MessageBox.Show("Введите адрес!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            if (!_mainViewModel.CartItems.Any())
-            {
-                MessageBox.Show("Корзина пуста!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+            _totalAmount = _mainVm.CartItems.Sum(i => i.TotalPrice);
+            var count = _mainVm.CartItems.Sum(i => i.Quantity);
 
-            foreach (var item in _mainViewModel.CartItems)
+            TotalAmountText.Text = $"{_totalAmount:C}";
+            TotalCountText.Text = $"Товаров: {count} шт.";
+
+            _isLoggedIn = _api != null && _api.IsLoggedIn;
+
+            if (_isLoggedIn)
             {
-                if (item.Quantity > item.Product.StockQuantity)
+                UserDataPanel.Visibility = Visibility.Collapsed;
+                LoggedInInfoPanel.Visibility = Visibility.Visible;
+                BonusPanel.Visibility = Visibility.Visible;
+
+                var user = _api.CurrentUser;
+                if (user != null)
                 {
-                    MessageBox.Show(
-                        $"Товара \"{item.Product.Name}\" недостаточно на складе!\n" +
-                        $"В наличии: {item.Product.StockQuantity}, вы запросили: {item.Quantity}\n" +
-                        $"Пожалуйста, уменьшите количество.",
-                        "Ошибка",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
+                    LoggedInNameText.Text = $"👤 {user.Username}";
+                    LoggedInPhoneText.Text = $"📞 {user.Phone}";
+                    LoggedInAddressText.Text = $"📍 {user.Address}";
+                    BonusInfoText.Text = $"Доступно: {user.BonusPointsDisplay}";
+                }
+                UpdateBonusInfo();
+            }
+            else
+            {
+                UserDataPanel.Visibility = Visibility.Visible;
+                LoggedInInfoPanel.Visibility = Visibility.Collapsed;
+                BonusPanel.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void UpdateBonusInfo()
+        {
+            if (UseBonusCheckBox.IsChecked == true)
+            {
+                var bonusToUse = Math.Min(_api.CurrentUser.BonusPoints, _totalAmount);
+                TotalAmountText.Text = $"{_totalAmount - bonusToUse:C}";
+                BonusAfterPurchaseText.Text = $"Будет списано {bonusToUse:N0} бонусов";
+            }
+            else
+            {
+                TotalAmountText.Text = $"{_totalAmount:C}";
+                var bonusToEarn = _totalAmount * 0.01m;
+                BonusAfterPurchaseText.Text = $"Будет начислено {bonusToEarn:N0} бонусов (1%)";
+            }
+        }
+
+        private void UseBonusCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+            UpdateBonusInfo();
+        }
+
+        private async void ConfirmOrder_Click(object sender, RoutedEventArgs e)
+        {
+            string customerName, phone, address;
+
+            if (_isLoggedIn)
+            {
+                customerName = _api.CurrentUser.Username;
+                phone = _api.CurrentUser.Phone;
+                address = _api.CurrentUser.Address;
+            }
+            else
+            {
+                customerName = CustomerNameTextBox.Text?.Trim();
+                phone = PhoneTextBox.Text?.Trim();
+                address = AddressTextBox.Text?.Trim();
+
+                if (string.IsNullOrWhiteSpace(customerName))
+                {
+                    MessageBox.Show("Введите имя", "Ошибка");
+                    return;
+                }
+                if (string.IsNullOrWhiteSpace(phone))
+                {
+                    MessageBox.Show("Введите телефон", "Ошибка");
+                    return;
+                }
+                if (string.IsNullOrWhiteSpace(address))
+                {
+                    MessageBox.Show("Введите адрес", "Ошибка");
                     return;
                 }
             }
 
             try
             {
-                SubmitButton.IsEnabled = false;
-                SubmitButton.Content = "ОФОРМЛЕНИЕ...";
+                IsEnabled = false;
 
-                var orderId = await _mainViewModel.PlaceOrderAsync(
-                    NameBox.Text,
-                    PhoneBox.Text,
-                    AddressBox.Text);
+                var api = _api ?? new ApiService("http://localhost:5000");
+                var items = _mainVm.CartItems.ToList();
+                var useBonus = _isLoggedIn && UseBonusCheckBox.IsChecked == true;
+                var bonusToUse = useBonus ? Math.Min(api.CurrentUser?.BonusPoints ?? 0, _totalAmount) : 0;
 
-                MessageBox.Show(
-                    $"Заказ №{orderId} успешно оформлен!\nСпасибо за покупку!",
-                    "Успех!",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                var orderId = await api.CreateOrderAsync(customerName, phone, address, items, useBonus, bonusToUse);
 
-                _mainViewModel.ClearCart();
+                _mainVm.CartItems.Clear();
+
+                var finalAmount = _totalAmount - bonusToUse;
+                var bonusEarned = (!useBonus && _isLoggedIn) ? finalAmount * 0.01m : 0;
+
+                string message = $"✅ Заказ №{orderId} оформлен!\n\nИтого: {finalAmount:C}";
+                if (useBonus) message += $"\nСписано бонусов: {bonusToUse:N0}";
+                if (bonusEarned > 0) message += $"\nНачислено бонусов: {bonusEarned:N0}";
+                message += "\n\nСпасибо за покупку! 🎉";
+
+                MessageBox.Show(message, "Заказ оформлен", MessageBoxButton.OK, MessageBoxImage.Information);
                 Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка оформления заказа: {ex.Message}", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка");
             }
             finally
             {
-                SubmitButton.IsEnabled = true;
-                SubmitButton.Content = "ПОДТВЕРДИТЬ ЗАКАЗ";
+                IsEnabled = true;
             }
         }
-        
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 }

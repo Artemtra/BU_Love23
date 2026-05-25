@@ -43,9 +43,9 @@ namespace BU_Love.API.Services
                 Username = registerDto.Username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
                 Role = "Customer",
-                Phone = registerDto.Phone,
-                Address = registerDto.Address,
-                BonusPoints = 100, // Приветственные бонусы
+                Phone = registerDto.Phone,      
+                Address = registerDto.Address,   
+                BonusPoints = 100,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -54,32 +54,36 @@ namespace BU_Love.API.Services
 
             return GenerateToken(user);
         }
-        private AuthResponseDto GenerateToken(DB.User user)
+        private AuthResponseDto GenerateToken(User user)
         {
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Role),
-                new Claim("UserId", user.Id.ToString())
-            };
+        new Claim(ClaimTypes.Name, user.Username ?? ""),
+        new Claim(ClaimTypes.Role, user.Role ?? "Customer"),
+        new Claim("userId", user.Id.ToString()) // Уберите .Value, оставьте просто Id
+    };
 
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "DefaultKey1234567890"));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
+                issuer: _configuration["Jwt:Issuer"] ?? "BU_Love",
+                audience: _configuration["Jwt:Audience"] ?? "BU_Love_Client",
                 claims: claims,
-                expires: DateTime.Now.AddHours(3),
+                expires: DateTime.Now.AddDays(7),
                 signingCredentials: creds);
 
             return new AuthResponseDto
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
-                Username = user.Username,
-                Role = user.Role
+                Username = user.Username ?? "",
+                Role = user.Role ?? "Customer",
+                Phone = user.Phone ?? "",
+                Address = user.Address ?? "",
+                BonusPoints = user.BonusPoints ?? 0
             };
         }
     }
+    
 }

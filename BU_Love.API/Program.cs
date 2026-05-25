@@ -2,23 +2,24 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 using BU_Love.API.DB;
 using BU_Love.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+// Подключение к MySQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<BuLoveDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
 );
-
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
     {
         options.SuppressModelStateInvalidFilter = false;
     });
 
+// JWT аутентификация
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -38,7 +39,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Регистрация сервисов
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Настройка CORS
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -49,7 +50,15 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
+// Контроллеры с настройкой JSON (Игнорирование циклов)
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Игнорирует циклические ссылки
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        // Игнорирует null значения
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -63,24 +72,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAll");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<BuLoveDbContext>();
-    try
-    {
-        dbContext.Database.EnsureCreated(); // Создаст БД если её нет
-    }
-    catch (Exception ex)
-    {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ошибка при подключении к базе данных");
-    }
-}
 
 app.Run();

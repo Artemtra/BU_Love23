@@ -1,7 +1,9 @@
-﻿using BU_Love.API.DTO;
+﻿using BU_Love.API.DB;
+using BU_Love.API.DTO;
 using BU_Love.API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BU_Love.API.Controllers
 {
@@ -11,12 +13,33 @@ namespace BU_Love.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly BuLoveDbContext _context;
+
 
         public AuthController(IAuthService authService)
         {
             _authService = authService;
         }
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            var userId = User.FindFirst("userId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
 
+            var user = await _context.Users.FindAsync(int.Parse(userId));
+            if (user == null)
+                return NotFound();
+
+            return Ok(new AuthResponseDto
+            {
+                Username = user.Username,
+                Role = user.Role,
+                Phone = user.Phone,
+                Address = user.Address,
+                BonusPoints = (int)user.BonusPoints
+            });
+        }
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {

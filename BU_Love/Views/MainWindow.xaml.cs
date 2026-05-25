@@ -12,12 +12,14 @@ namespace BU_Love
     public partial class MainWindow : Window
     {
         private MainViewModel _viewModel;
+        private readonly ApiService _api;
         private DateTime _lastUpdateTime;
 
         public MainWindow()
         {
             InitializeComponent();
 
+            _api = new ApiService("http://localhost:5000");
             _viewModel = new MainViewModel();
             DataContext = _viewModel;
 
@@ -74,12 +76,22 @@ namespace BU_Love
 
         private void ProfileButton_Click(object sender, RoutedEventArgs e)
         {
-            var api = new ApiService("http://localhost:5000");
-            var loginWindow = new LoginWindow(api);
-            loginWindow.Owner = this;
-
-            if (loginWindow.ShowDialog() == true)
+            if (!_api.IsLoggedIn)
             {
+                var loginWindow = new LoginWindow(_api);
+                loginWindow.Owner = this;
+
+                if (loginWindow.ShowDialog() == true)
+                {
+                    UpdateProfileButton();
+                    UpdateCartInfo();
+                }
+            }
+            else
+            {
+                var profileWindow = new ProfileWindow(_api, _viewModel);
+                profileWindow.Owner = this;
+                profileWindow.ShowDialog();
                 UpdateProfileButton();
                 UpdateCartInfo();
             }
@@ -87,22 +99,29 @@ namespace BU_Love
 
         private void UpdateProfileButton()
         {
-            ProfileButton.Content = "👤 ВОЙТИ";
-            ProfileButton.Background = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3));
+            if (_api.IsLoggedIn)
+            {
+                ProfileButton.Content = $"👤 {_api.CurrentUser.Username}";
+                ProfileButton.Background = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+            }
+            else
+            {
+                ProfileButton.Content = "👤 ВОЙТИ";
+                ProfileButton.Background = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3));
+            }
         }
 
-        private void CartButton_Click(object sender, RoutedEventArgs e)
-        {
-            var cartWindow = new CartWindow(_viewModel);
-            cartWindow.Owner = this;
-            cartWindow.ShowDialog();
-            UpdateCartInfo();
-        }
+private void CartButton_Click(object sender, RoutedEventArgs e)
+{
+    var cartWindow = new CartWindow(_viewModel, _api);
+    cartWindow.Owner = this;
+    cartWindow.ShowDialog();
+    UpdateCartInfo();
+}
 
         private void AdminButton_Click(object sender, RoutedEventArgs e)
         {
-            var api = new ApiService("http://localhost:5000");
-            var loginWindow = new AdminLoginWindow(api);
+            var loginWindow = new AdminLoginWindow(_api);
             loginWindow.Owner = this;
 
             loginWindow.Closed += async (s, args) =>
@@ -117,7 +136,14 @@ namespace BU_Love
         {
             var count = _viewModel.CartItems.Count;
             var total = _viewModel.TotalAmount;
-            CartInfo.Text = $"🛒 В корзине: {count} товаров на {total:C}";
+
+            string bonusInfo = "";
+            if (_api.IsLoggedIn)
+            {
+                bonusInfo = $" | 🎁 {_api.CurrentUser.BonusPointsDisplay}";
+            }
+
+            CartInfo.Text = $"🛒 В корзине: {count} товаров на {total:C}{bonusInfo}";
         }
 
         private void ShowCategories()
@@ -243,7 +269,7 @@ namespace BU_Love
         {
             if (sender is Button button && button.Tag is Category category)
             {
-                var productsWindow = new ProductsWindow(category, _viewModel);
+                var productsWindow = new ProductsWindow(category, _viewModel, _api);
                 productsWindow.Owner = this;
                 productsWindow.ShowDialog();
                 UpdateCartInfo();

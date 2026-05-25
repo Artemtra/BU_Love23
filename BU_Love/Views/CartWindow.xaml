@@ -15,17 +15,11 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
         <Border Grid.Row="0" Background="#2d2d2d" Padding="30,0">
             <Grid>
-                <Button Content="← ПРОДОЛЖИТЬ ПОКУПКИ" 
-                        Click="BackButton_Click"
-                        FontSize="20"
-                        Background="Transparent"
-                        Foreground="White"
-                        BorderThickness="0"
-                        Cursor="Hand"
-                        HorizontalAlignment="Left"/>
+                <Button Content="← ПРОДОЛЖИТЬ ПОКУПКИ" Click="BackButton_Click"
+                        FontSize="20" Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand" HorizontalAlignment="Left"/>
                 <TextBlock Text="КОРЗИНА" FontSize="28" FontWeight="Bold" 
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Grid>
@@ -37,37 +31,74 @@
                 <ColumnDefinition Width="400"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Список товаров -->
+            <!-- Левая часть -->
             <ScrollViewer Grid.Column="0" Margin="30">
-                <StackPanel x:Name="CartItemsPanel"/>
+                <StackPanel>
+                    <StackPanel x:Name="CartItemsPanel"/>
+
+                    <!-- Поля для НЕавторизованного пользователя -->
+                    <Border x:Name="GuestDataPanel" Background="#2d2d2d" Padding="20" CornerRadius="10" 
+                            Margin="0,20,0,0" Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="📋 Данные для заказа" FontSize="20" FontWeight="Bold" 
+                                       Foreground="#FF9800" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="Имя" Margin="0,0,0,5"/>
+                            <TextBox x:Name="CustomerNameTextBox" FontSize="16" Padding="10" 
+                                     Background="#1a1a1a" Foreground="White" BorderBrush="#4a4a4a" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="Телефон" Margin="0,0,0,5"/>
+                            <TextBox x:Name="PhoneTextBox" FontSize="16" Padding="10" 
+                                     Background="#1a1a1a" Foreground="White" BorderBrush="#4a4a4a" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="Адрес доставки" Margin="0,0,0,5"/>
+                            <TextBox x:Name="AddressTextBox" FontSize="16" Padding="10" 
+                                     Background="#1a1a1a" Foreground="White" BorderBrush="#4a4a4a" 
+                                     Height="60" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
             </ScrollViewer>
 
-            <!-- Итого -->
+            <!-- Правая часть -->
             <Border Grid.Column="1" Background="#2d2d2d" Padding="30">
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="ИТОГО" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
-
                     <TextBlock x:Name="TotalAmountText" FontSize="42" FontWeight="Bold" 
                                Foreground="#4CAF50" Margin="0,0,0,30"/>
 
-                    <Border Background="#1a1a1a" CornerRadius="10" Padding="20" Margin="0,0,0,30">
+                    <Border Background="#1a1a1a" CornerRadius="10" Padding="20" Margin="0,0,0,20">
                         <StackPanel>
                             <TextBlock Text="Количество товаров:" FontSize="16" Foreground="#aaaaaa"/>
                             <TextBlock x:Name="TotalCountText" FontSize="24" FontWeight="Bold"/>
                         </StackPanel>
                     </Border>
 
-                    <Button Content="🛒 ОФОРМИТЬ ЗАКАЗ"
-                            Click="CheckoutButton_Click"
+                    <!-- Бонусы (только для авторизованных) -->
+                    <Border x:Name="BonusPanel" Background="#1a1a1a" Padding="15" CornerRadius="10" 
+                            Margin="0,0,0,20" Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="🎁 Бонусная программа" FontSize="16" FontWeight="Bold" 
+                                       Foreground="#FF9800" Margin="0,0,0,10"/>
+                            <TextBlock x:Name="BonusInfoText" Text="" FontSize="14" 
+                                       Foreground="#aaaaaa" Margin="0,0,0,5"/>
+                            <CheckBox x:Name="UseBonusCheckBox" Content="Списать бонусы" 
+                                      Foreground="White" FontSize="14" Margin="0,5,0,0"
+                                      Checked="UseBonusCheckBox_Changed" 
+                                      Unchecked="UseBonusCheckBox_Changed"/>
+                            <TextBlock x:Name="BonusAfterPurchaseText" Text="" FontSize="12" 
+                                       Foreground="#4CAF50" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Content="🛒 ОФОРМИТЬ ЗАКАЗ" Click="CheckoutButton_Click"
                             Background="#4CAF50" Foreground="White"
                             FontSize="22" FontWeight="Bold" Padding="20,15"
                             BorderThickness="0" Cursor="Hand"/>
 
-                    <Button Content="🗑️ Очистить корзину"
-                            Click="ClearCartButton_Click"
+                    <Button Content="🗑️ Очистить корзину" Click="ClearCartButton_Click"
                             Background="Transparent" Foreground="#ff4444"
-                            FontSize="16" BorderThickness="0"
-                            Cursor="Hand" Margin="0,20,0,0"/>
+                            FontSize="16" BorderThickness="0" Cursor="Hand" Margin="0,20,0,0"/>
                 </StackPanel>
             </Border>
         </Grid>

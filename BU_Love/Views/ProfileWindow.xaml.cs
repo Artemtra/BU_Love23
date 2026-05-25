@@ -1,24 +1,14 @@
 ﻿using BU_Love.Models;
 using BU_Love.Services;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace BU_Love.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для ProfileWindow.xaml
-    /// </summary>
     public partial class ProfileWindow : Window
     {
         private readonly ApiService _api;
@@ -48,12 +38,12 @@ namespace BU_Love.Views
             BonusText.Text = $"🎁 {user.BonusPointsDisplay}";
         }
 
-        private async Task CartButton_ClickAsync(object sender, RoutedEventArgs e)
+        private void CartButton_Click(object sender, RoutedEventArgs e)
         {
-            var cartWindow = new CartWindow(_viewModel);
+            var cartWindow = new CartWindow(_viewModel, _api);
             cartWindow.Owner = this;
             cartWindow.ShowDialog();
-            await LoadProfile();
+            LoadProfile();
         }
 
         private async void OrdersButton_Click(object sender, RoutedEventArgs e)
@@ -62,7 +52,6 @@ namespace BU_Love.Views
             {
                 var orders = await _api.GetOrdersAsync();
 
-                // Фильтруем заказы пользователя по имени
                 var userOrders = orders
                     .Where(o => o.CustomerName == _api.CurrentUser.Username ||
                                 o.Phone == _api.CurrentUser.Phone)

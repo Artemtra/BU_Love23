@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace BU_Love.API.Models;
 
@@ -22,4 +23,7 @@ public partial class Order
     public virtual ICollection<Orderitem> Orderitems { get; set; } = new List<Orderitem>();
 
     public virtual User? User { get; set; }
+
+    [JsonIgnore]
+    public virtual ICollection<Orderitem> OrderItems { get; set; }
 }

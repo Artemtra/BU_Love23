@@ -71,7 +71,6 @@ namespace BU_Love.Services
         public async Task DeleteAllProductsAsync()
         {
             var response = await _httpClient.DeleteAsync("api/products/delete-all");
-
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
@@ -102,7 +101,6 @@ namespace BU_Love.Services
         public async Task DeleteAllCategoriesAsync()
         {
             var response = await _httpClient.DeleteAsync("api/categories/delete-all");
-
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
@@ -127,10 +125,10 @@ namespace BU_Love.Services
 
             _currentUser = new UserProfile
             {
-                Username = result.Username,
-                Role = result.Role,
-                Phone = result.Phone,
-                Address = result.Address,
+                Username = result.Username ?? "",
+                Role = result.Role ?? "Customer",
+                Phone = result.Phone ?? "",
+                Address = result.Address ?? "",
                 BonusPoints = result.BonusPoints
             };
 
@@ -154,10 +152,10 @@ namespace BU_Love.Services
 
             _currentUser = new UserProfile
             {
-                Username = result.Username,
-                Role = result.Role,
-                Phone = result.Phone,
-                Address = result.Address,
+                Username = result.Username ?? "",
+                Role = result.Role ?? "Customer",
+                Phone = result.Phone ?? "",
+                Address = result.Address ?? "",
                 BonusPoints = result.BonusPoints
             };
 
@@ -194,7 +192,6 @@ namespace BU_Love.Services
         public async Task DeleteOrderAsync(int orderId)
         {
             var response = await _httpClient.DeleteAsync($"api/orders/{orderId}");
-
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
@@ -205,7 +202,6 @@ namespace BU_Love.Services
         public async Task DeleteAllOrdersAsync()
         {
             var response = await _httpClient.DeleteAsync("api/orders/delete-all");
-
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
@@ -214,8 +210,8 @@ namespace BU_Love.Services
         }
 
         public async Task<int> CreateOrderAsync(string customerName, string phone,
-            string address, List<CartItem> items, bool useBonusPoints = false,
-            decimal bonusPointsToUse = 0)
+    string address, List<CartItem> items, bool useBonusPoints = false,
+    decimal bonusPointsToUse = 0)
         {
             var orderData = new
             {
@@ -232,6 +228,9 @@ namespace BU_Love.Services
                 })
             };
 
+            // Проверяем, передан ли токен
+            Console.WriteLine($"Token: {_httpClient.DefaultRequestHeaders.Authorization}");
+
             var response = await _httpClient.PostAsJsonAsync("api/orders", orderData);
 
             if (!response.IsSuccessStatusCode)
@@ -242,7 +241,6 @@ namespace BU_Love.Services
 
             var result = await response.Content.ReadFromJsonAsync<OrderResult>();
 
-            // Обновляем бонусы пользователя после заказа
             if (IsLoggedIn)
             {
                 await RefreshUserProfileAsync();
@@ -254,37 +252,32 @@ namespace BU_Love.Services
         public async Task<List<Order>> GetOrdersAsync()
         {
             var response = await _httpClient.GetAsync("api/orders");
-
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
                 throw new Exception($"Ошибка загрузки заказов: {response.StatusCode} - {error}");
             }
-
             return await response.Content.ReadFromJsonAsync<List<Order>>();
         }
 
-        // ===== ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ =====
+        // ===== ПРОФИЛЬ =====
         public async Task<UserProfile> GetProfileAsync()
         {
             var response = await _httpClient.GetAsync("api/auth/profile");
-
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception("Не удалось загрузить профиль");
             }
 
             var result = await response.Content.ReadFromJsonAsync<AuthResult>();
-
             _currentUser = new UserProfile
             {
-                Username = result.Username,
-                Role = result.Role,
-                Phone = result.Phone,
-                Address = result.Address,
+                Username = result.Username ?? "",
+                Role = result.Role ?? "Customer",
+                Phone = result.Phone ?? "",
+                Address = result.Address ?? "",
                 BonusPoints = result.BonusPoints
             };
-
             return _currentUser;
         }
 
@@ -302,10 +295,7 @@ namespace BU_Love.Services
                     }
                 }
             }
-            catch
-            {
-                // Игнорируем ошибки обновления профиля
-            }
+            catch { }
         }
 
         // ===== ЗАГРУЗКА ИЗОБРАЖЕНИЙ =====
@@ -314,12 +304,10 @@ namespace BU_Love.Services
             using var form = new MultipartFormDataContent();
             using var fileStream = File.OpenRead(filePath);
             using var fileContent = new StreamContent(fileStream);
-
             fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
             form.Add(fileContent, "file", Path.GetFileName(filePath));
 
             var response = await _httpClient.PostAsync("api/upload", form);
-
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
@@ -327,7 +315,7 @@ namespace BU_Love.Services
             }
 
             var result = await response.Content.ReadFromJsonAsync<UploadResult>();
-            return result.ImageUrl;
+            return result?.ImageUrl ?? "";
         }
 
         // ===== ВСПОМОГАТЕЛЬНЫЕ КЛАССЫ =====
@@ -342,7 +330,6 @@ namespace BU_Love.Services
             public string Token { get; set; } = string.Empty;
             public string Username { get; set; } = string.Empty;
             public string Role { get; set; } = string.Empty;
-            public string FullName { get; set; } = string.Empty;
             public string Phone { get; set; } = string.Empty;
             public string Address { get; set; } = string.Empty;
             public decimal BonusPoints { get; set; }

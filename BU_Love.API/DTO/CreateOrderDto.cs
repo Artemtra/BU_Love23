@@ -5,6 +5,8 @@
         public string CustomerName { get; set; }
         public string Phone { get; set; }
         public string Address { get; set; }
+        public bool UseBonusPoints { get; set; }
+        public decimal BonusPointsToUse { get; set; }
         public List<OrderItemDto> Items { get; set; }
     }
 }

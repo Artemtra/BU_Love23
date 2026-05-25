@@ -3,6 +3,7 @@ using BU_Love.API.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace BU_Love.API.Controllers
 {
@@ -21,6 +22,8 @@ namespace BU_Love.API.Controllers
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] CreateOrderDto orderDto)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
             try
             {
                 if (string.IsNullOrWhiteSpace(orderDto.CustomerName))
@@ -43,13 +46,35 @@ namespace BU_Love.API.Controllers
                     product.StockQuantity -= item.Quantity;
                 }
 
+                var totalAmount = orderDto.Items.Sum(i => i.Price * i.Quantity);
+
+                // Получаем ID пользователя из токена
+                var userIdClaim = User.FindFirst("userId")?.Value;
+                User currentUser = null;
+
+                if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int userId))
+                {
+                    currentUser = await _context.Users.FindAsync(userId);
+                }
+
+                // Списание бонусов
+                if (orderDto.UseBonusPoints && orderDto.BonusPointsToUse > 0 && currentUser != null)
+                {
+                    if (currentUser.BonusPoints >= orderDto.BonusPointsToUse)
+                    {
+                        currentUser.BonusPoints -= (int?)orderDto.BonusPointsToUse;
+                        totalAmount -= orderDto.BonusPointsToUse;
+                        if (totalAmount < 0) totalAmount = 0;
+                    }
+                }
+
                 var order = new Order
                 {
                     CustomerName = orderDto.CustomerName,
                     Phone = orderDto.Phone,
                     Address = orderDto.Address,
                     OrderDate = DateTime.Now,
-                    TotalAmount = orderDto.Items.Sum(i => i.Price * i.Quantity),
+                    TotalAmount = totalAmount,
                     Orderitems = orderDto.Items.Select(i => new Orderitem
                     {
                         ProductId = i.ProductId,
@@ -61,16 +86,25 @@ namespace BU_Love.API.Controllers
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
 
+                // Начисление бонусов 1% (только если НЕ списывали)
+                if (!orderDto.UseBonusPoints && currentUser != null)
+                {
+                    decimal bonusEarned = totalAmount * 0.01m;
+                    currentUser.BonusPoints += (int?)bonusEarned;
+                    await _context.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+
                 return Ok(new { OrderId = order.Id, TotalAmount = order.TotalAmount });
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 return StatusCode(500, new { message = ex.Message });
             }
         }
 
-        // Получить все заказы (только админ)
-        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
@@ -89,8 +123,6 @@ namespace BU_Love.API.Controllers
             }
         }
 
-        // Получить заказ по ID (только админ)
-        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(int id)
         {
@@ -117,11 +149,9 @@ namespace BU_Love.API.Controllers
         {
             try
             {
-                // Сначала удаляем все позиции заказов
                 var allOrderItems = await _context.Orderitems.ToListAsync();
                 _context.Orderitems.RemoveRange(allOrderItems);
 
-                // Затем удаляем все заказы
                 var allOrders = await _context.Orders.ToListAsync();
                 _context.Orders.RemoveRange(allOrders);
 
@@ -147,7 +177,6 @@ namespace BU_Love.API.Controllers
                 if (order == null)
                     return NotFound(new { message = "Заказ не найден" });
 
-
                 foreach (var item in order.Orderitems)
                 {
                     var product = await _context.Products.FindAsync(item.ProductId);
@@ -157,13 +186,10 @@ namespace BU_Love.API.Controllers
                     }
                 }
 
-
                 var orderItems = await _context.Orderitems
                     .Where(oi => oi.OrderId == id)
                     .ToListAsync();
                 _context.Orderitems.RemoveRange(orderItems);
-
-
                 await _context.SaveChangesAsync();
 
                 _context.Orders.Remove(order);

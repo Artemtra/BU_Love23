@@ -1,23 +1,10 @@
-﻿using BU_Love.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using BU_Love.Services;
 
 namespace BU_Love.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для LoginWindow.xaml
-    /// </summary>
     public partial class LoginWindow : Window
     {
         private readonly ApiService _api;
@@ -79,8 +66,7 @@ namespace BU_Love.Views
                     SubmitBtn.Content = "ВХОД...";
                     var user = await _api.LoginAsync(LoginUsername.Text.Trim(), LoginPassword.Password);
 
-                    MessageBox.Show($"Добро пожаловать, {user.Username}!\nБонусов: {user.BonusPointsDisplay}",
-                        "Успех");
+                    MessageBox.Show($"Добро пожаловать, {user.Username}!\nБонусов: {user.BonusPointsDisplay}", "Успех");
 
                     DialogResult = true;
                     Close();
@@ -103,8 +89,7 @@ namespace BU_Love.Views
                         RegPhone.Text.Trim(),
                         RegAddress.Text.Trim());
 
-                    MessageBox.Show($"Регистрация успешна!\nДобро пожаловать, {user.Username}!\nНачислено 100 бонусов!",
-                        "Успех");
+                    MessageBox.Show($"Регистрация успешна!\nДобро пожаловать, {user.Username}!\nНачислено 100 бонусов!", "Успех");
 
                     DialogResult = true;
                     Close();
