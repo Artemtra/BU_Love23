@@ -189,10 +189,10 @@
                                             <TextBlock Text="{Binding Price, StringFormat={}{0:C}}" Foreground="#4CAF50" FontSize="14"/>
                                         </StackPanel>
                                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                            <Button Content="✏️" Tag="{Binding}" Click="EditProduct_Click"
+                                            <Button Content="✏️" Tag="{Binding Product}" Click="EditProduct_Click"
                                                     Background="#2196F3" Foreground="White" Width="35" Height="35"
                                                     BorderThickness="0" Cursor="Hand" Margin="0,0,5,0"/>
-                                            <Button Content="🗑️" Tag="{Binding}" Click="DeleteProduct_Click"
+                                            <Button Content="🗑️" Tag="{Binding Product}" Click="DeleteProduct_Click"
                                                     Background="#ff4444" Foreground="White" Width="35" Height="35"
                                                     BorderThickness="0" Cursor="Hand"/>
                                         </StackPanel>

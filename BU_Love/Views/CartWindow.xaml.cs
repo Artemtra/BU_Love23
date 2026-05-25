@@ -266,17 +266,17 @@ namespace BU_Love.Views
                 var finalAmount = totalAmount - bonusToUse;
                 decimal bonusEarned = 0;
 
-                // Обновляем бонусы локально (без запроса к серверу)
+                // Обновляем бонусы ТОЛЬКО локально (сервер уже обновил БД)
+                // НЕ вызываем GetProfileAsync, просто считаем локально
                 if (_isLoggedIn && _api.CurrentUser != null)
                 {
                     if (useBonus)
                     {
-                        _api.CurrentUser.BonusPoints -= bonusToUse;
+                        bonusEarned = 0; // При списании не начисляем
                     }
                     else
                     {
                         bonusEarned = finalAmount * 0.01m;
-                        _api.CurrentUser.BonusPoints += bonusEarned;
                     }
                 }
 

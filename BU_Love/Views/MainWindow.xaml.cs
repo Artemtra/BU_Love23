@@ -135,7 +135,7 @@ private void CartButton_Click(object sender, RoutedEventArgs e)
         private void UpdateCartInfo()
         {
             var count = _viewModel.CartItems.Count;
-            var total = _viewModel.TotalAmount;
+            var total = _viewModel.CartItems.Sum(i => i.TotalPrice);
 
             string bonusInfo = "";
             if (_api.IsLoggedIn)

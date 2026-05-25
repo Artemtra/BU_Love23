@@ -1,10 +1,8 @@
 ﻿using BU_Love.Services;
 using BU_Love.Views;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -16,13 +14,13 @@ namespace BU_Love.Models
         private readonly ApiService _apiService;
         private ObservableCollection<Category> _categories;
         private ObservableCollection<CartItem> _cartItems;
-        private decimal _totalAmount;
         private bool _isLoading;
 
         public MainViewModel()
         {
             _apiService = new ApiService("http://localhost:5000");
             _cartItems = new ObservableCollection<CartItem>();
+            _cartItems.CollectionChanged += (s, e) => OnPropertyChanged(nameof(TotalAmount));
 
             OpenProductsCommand = new RelayCommand<Category>(async (cat) => await OpenProducts(cat));
             OpenCartCommand = new RelayCommand(OpenCart);
@@ -38,14 +36,19 @@ namespace BU_Love.Models
         public ObservableCollection<CartItem> CartItems
         {
             get => _cartItems;
-            set => SetProperty(ref _cartItems, value);
+            set
+            {
+                if (_cartItems != null)
+                    _cartItems.CollectionChanged -= OnCartChanged;
+
+                SetProperty(ref _cartItems, value);
+
+                if (_cartItems != null)
+                    _cartItems.CollectionChanged += OnCartChanged;
+            }
         }
 
-        public decimal TotalAmount
-        {
-            get => _totalAmount;
-            set => SetProperty(ref _totalAmount, value);
-        }
+        public decimal TotalAmount => CartItems?.Sum(i => i.TotalPrice) ?? 0;
 
         public bool IsLoading
         {
@@ -56,6 +59,11 @@ namespace BU_Love.Models
         public ICommand OpenProductsCommand { get; }
         public ICommand OpenCartCommand { get; }
         public ICommand OpenAdminCommand { get; }
+
+        private void OnCartChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(TotalAmount));
+        }
 
         public async Task LoadCategoriesAsync()
         {
@@ -104,30 +112,21 @@ namespace BU_Love.Models
                 existingItem.Quantity++;
             else
                 CartItems.Add(new CartItem { Product = product, Quantity = 1 });
-
-            UpdateTotal();
         }
 
         public void RemoveFromCart(CartItem item)
         {
             CartItems.Remove(item);
-            UpdateTotal();
         }
 
         public void ClearCart()
         {
             CartItems.Clear();
-            UpdateTotal();
         }
 
         public async Task<int> PlaceOrderAsync(string name, string phone, string address)
         {
             return await _apiService.CreateOrderAsync(name, phone, address, CartItems.ToList());
-        }
-
-        private void UpdateTotal()
-        {
-            TotalAmount = CartItems.Sum(i => i.TotalPrice);
         }
     }
 }

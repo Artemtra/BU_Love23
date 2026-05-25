@@ -1,25 +1,14 @@
 ﻿using BU_Love.Models;
 using BU_Love.Services;
-using BU_Love.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace BU_Love.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для ProductsWindow.xaml
-    /// </summary>
     public partial class ProductsWindow : Window
     {
         private readonly Category _category;
@@ -39,31 +28,48 @@ namespace BU_Love.Views
         {
             try
             {
-                var products = await _api.GetProductsAsync(_category.Id);
+
+                var allProducts = await _api.GetProductsAsync(_category.Id);
+
+                // Показываем только товары в наличии
+                var products = allProducts.Where(p => p.StockQuantity > 0).ToList();
+
+                ProductsWrapPanel.Children.Clear();
+
+                if (!products.Any())
+                {
+                    ProductsWrapPanel.Children.Add(new TextBlock
+                    {
+                        Text = "📭 Нет товаров в наличии",
+                        FontSize = 24,
+                        Foreground = new SolidColorBrush(Color.FromRgb(0xaa, 0xaa, 0xaa)),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Margin = new Thickness(0, 50, 0, 0)
+                    });
+                    return;
+                }
 
                 foreach (var product in products)
                 {
-
                     var border = new Border
                     {
                         Width = 300,
                         Margin = new Thickness(15),
                         Padding = new Thickness(20),
-                        Background = new System.Windows.Media.SolidColorBrush(
-                            System.Windows.Media.Color.FromRgb(0x2d, 0x2d, 0x2d)),
+                        Background = new SolidColorBrush(Color.FromRgb(0x2d, 0x2d, 0x2d)),
                         CornerRadius = new CornerRadius(15),
-                        BorderBrush = new System.Windows.Media.SolidColorBrush(
-                            System.Windows.Media.Color.FromRgb(0x3d, 0x3d, 0x3d)),
+                        BorderBrush = new SolidColorBrush(Color.FromRgb(0x3d, 0x3d, 0x3d)),
                         BorderThickness = new Thickness(2)
                     };
 
                     var stack = new StackPanel();
 
+                    // Изображение товара
                     var image = new Image
                     {
                         Width = 200,
                         Height = 200,
-                        Stretch = System.Windows.Media.Stretch.Uniform,
+                        Stretch = Stretch.Uniform,
                         Margin = new Thickness(0, 0, 0, 15)
                     };
 
@@ -76,9 +82,9 @@ namespace BU_Love.Views
                         }
                         catch { }
                     }
-
                     stack.Children.Add(image);
 
+                    // Название товара
                     stack.Children.Add(new TextBlock
                     {
                         Text = product.Name,
@@ -88,33 +94,63 @@ namespace BU_Love.Views
                         Margin = new Thickness(0, 0, 0, 5)
                     });
 
+                    // Описание
                     stack.Children.Add(new TextBlock
                     {
                         Text = product.Description,
                         FontSize = 14,
-                        Foreground = new System.Windows.Media.SolidColorBrush(
-                            System.Windows.Media.Color.FromRgb(0xaa, 0xaa, 0xaa)),
+                        Foreground = new SolidColorBrush(Color.FromRgb(0xaa, 0xaa, 0xaa)),
                         TextWrapping = TextWrapping.Wrap,
                         Margin = new Thickness(0, 0, 0, 10)
                     });
 
+                    // Количество в наличии
+                    var stockColor = product.StockQuantity <= 3
+                        ? Color.FromRgb(0xFF, 0x98, 0x00)  // Оранжевый - мало
+                        : Color.FromRgb(0x4C, 0xAF, 0x50); // Зеленый - достаточно
+
+                    stack.Children.Add(new TextBlock
+                    {
+                        Text = $"📦 В наличии: {product.StockQuantity} шт.",
+                        FontSize = 14,
+                        Foreground = new SolidColorBrush(stockColor),
+                        Margin = new Thickness(0, 0, 0, 5)
+                    });
+
+                    // Состояние товара
+                    string conditionText = product.Condition switch
+                    {
+                        "Excellent" => "Отличное",
+                        "Good" => "Хорошее",
+                        "Fair" => "Удовлетворительное",
+                        _ => product.Condition
+                    };
+
+                    stack.Children.Add(new TextBlock
+                    {
+                        Text = $"🔧 Состояние: {conditionText}",
+                        FontSize = 14,
+                        Foreground = new SolidColorBrush(Color.FromRgb(0xaa, 0xaa, 0xaa)),
+                        Margin = new Thickness(0, 0, 0, 5)
+                    });
+
+                    // Цена
                     stack.Children.Add(new TextBlock
                     {
                         Text = $"{product.Price:C}",
                         FontSize = 28,
                         FontWeight = FontWeights.Bold,
-                        Foreground = new System.Windows.Media.SolidColorBrush(
-                            System.Windows.Media.Color.FromRgb(0x4C, 0xAF, 0x50)),
+                        Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)),
                         Margin = new Thickness(0, 0, 0, 15),
                         HorizontalAlignment = HorizontalAlignment.Center
                     });
 
+                    // Кнопка "В корзину"
                     var button = new Button
                     {
                         Content = "🛒 В КОРЗИНУ",
-                        Background = new System.Windows.Media.SolidColorBrush(
-                            System.Windows.Media.Color.FromRgb(0x4C, 0xAF, 0x50)),
-                        Foreground = new System.Windows.Media.SolidColorBrush(Colors.White),
+                        Background = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)),
+                        Foreground = new SolidColorBrush(Colors.White),
                         FontSize = 18,
                         FontWeight = FontWeights.Bold,
                         Padding = new Thickness(15, 12, 15, 12),
@@ -123,8 +159,8 @@ namespace BU_Love.Views
                         Tag = product
                     };
                     button.Click += AddToCart_Click;
-
                     stack.Children.Add(button);
+
                     border.Child = stack;
                     ProductsWrapPanel.Children.Add(border);
                 }
@@ -134,10 +170,25 @@ namespace BU_Love.Views
                 MessageBox.Show($"Ошибка загрузки товаров: {ex.Message}");
             }
         }
+
         private void AddToCart_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is Product product)
             {
+                // Проверяем, не превышает ли количество на складе
+                var existingItem = _mainVm.CartItems.FirstOrDefault(i => i.Product.Id == product.Id);
+                var currentQty = existingItem?.Quantity ?? 0;
+
+                if (currentQty + 1 > product.StockQuantity)
+                {
+                    MessageBox.Show(
+                        $"Нельзя добавить больше! Доступно: {product.StockQuantity} шт.",
+                        "Ограничение",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+
                 _mainVm.AddToCart(product);
                 MessageBox.Show($"{product.Name} добавлен в корзину!", "✅ Успех");
             }

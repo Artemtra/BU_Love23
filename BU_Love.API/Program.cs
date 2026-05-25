@@ -8,7 +8,7 @@ using BU_Love.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Подключение к MySQL
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<BuLoveDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
@@ -19,7 +19,6 @@ builder.Services.AddControllers()
         options.SuppressModelStateInvalidFilter = false;
     });
 
-// JWT аутентификация
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -50,13 +49,10 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Контроллеры с настройкой JSON (Игнорирование циклов)
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // Игнорирует циклические ссылки
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        // Игнорирует null значения
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
@@ -75,5 +71,6 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseStaticFiles();
 
 app.Run();
