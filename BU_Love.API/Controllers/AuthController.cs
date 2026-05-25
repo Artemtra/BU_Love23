@@ -16,9 +16,10 @@ namespace BU_Love.API.Controllers
         private readonly BuLoveDbContext _context;
 
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, BuLoveDbContext context)
         {
             _authService = authService;
+            _context = context;
         }
         [HttpGet("profile")]
         public async Task<IActionResult> GetProfile()

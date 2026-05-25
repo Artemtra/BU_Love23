@@ -60,7 +60,7 @@ namespace BU_Love.API.Services
             {
         new Claim(ClaimTypes.Name, user.Username ?? ""),
         new Claim(ClaimTypes.Role, user.Role ?? "Customer"),
-        new Claim("userId", user.Id.ToString()) // Уберите .Value, оставьте просто Id
+        new Claim("userId", user.Id.ToString()) 
     };
 
             var key = new SymmetricSecurityKey(
