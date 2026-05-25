@@ -101,15 +101,14 @@ namespace BU_Love.API.Controllers
 
                 try
                 {
-                    // Отключаем внешние ключи, чтобы не мешали
+
                     await _context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 0");
 
-                    // Обнуляем ProductId в OrderItems, чтобы сохранить историю заказов
-                    // но убрать связь с удаляемыми товарами
+
                     await _context.Database.ExecuteSqlRawAsync(
                         "UPDATE OrderItems SET ProductId = NULL WHERE ProductId IS NOT NULL");
 
-                    // Удаляем все товары
+
                     var allProducts = await _context.Products.ToListAsync();
 
                     if (!allProducts.Any())
@@ -122,10 +121,8 @@ namespace BU_Love.API.Controllers
                     _context.Products.RemoveRange(allProducts);
                     await _context.SaveChangesAsync();
 
-                    // Включаем обратно внешние ключи
                     await _context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 1");
 
-                    // Сбрасываем автоинкремент
                     await _context.Database.ExecuteSqlRawAsync("ALTER TABLE Products AUTO_INCREMENT = 1");
 
                     await transaction.CommitAsync();

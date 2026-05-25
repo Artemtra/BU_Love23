@@ -21,8 +21,8 @@ namespace BU_Love.API.Controllers
             _authService = authService;
             _context = context;
         }
-        [HttpGet("profile")]
-        public async Task<IActionResult> GetProfile()
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto updateDto)
         {
             var userId = User.FindFirst("userId")?.Value;
             if (string.IsNullOrEmpty(userId))
@@ -32,15 +32,38 @@ namespace BU_Love.API.Controllers
             if (user == null)
                 return NotFound();
 
-            return Ok(new AuthResponseDto
+            string oldPhone = user.Phone;
+
+            if (!string.IsNullOrEmpty(updateDto.Phone))
+                user.Phone = updateDto.Phone;
+            if (!string.IsNullOrEmpty(updateDto.Address))
+                user.Address = updateDto.Address;
+
+            await _context.SaveChangesAsync();
+
+            if (!string.IsNullOrEmpty(updateDto.Phone) && oldPhone != updateDto.Phone)
             {
-                Username = user.Username,
-                Role = user.Role,
-                Phone = user.Phone,
-                Address = user.Address,
-                BonusPoints = (int)user.BonusPoints
+                var orders = await _context.Orders
+                    .Where(o => o.Phone == oldPhone)
+                    .ToListAsync();
+
+                foreach (var order in orders)
+                {
+                    order.Phone = updateDto.Phone;
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(new
+            {
+                user.Username,
+                user.Role,
+                user.Phone,
+                user.Address,
+                user.BonusPoints
             });
         }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {

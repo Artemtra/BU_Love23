@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace BU_Love.API.DTO
+namespace BU_Love.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -21,29 +21,24 @@ namespace BU_Love.API.DTO
                 if (file == null || file.Length == 0)
                     return BadRequest("Файл не выбран");
 
-                // Разрешенные расширения
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
                 var extension = Path.GetExtension(file.FileName).ToLower();
 
                 if (!allowedExtensions.Contains(extension))
                     return BadRequest("Разрешены только изображения (jpg, png, gif)");
 
-                // Создаем папку uploads
                 var uploadsFolder = Path.Combine(_env.ContentRootPath, "wwwroot", "uploads");
                 if (!Directory.Exists(uploadsFolder))
                     Directory.CreateDirectory(uploadsFolder);
 
-                // Генерируем уникальное имя
                 var fileName = $"{Guid.NewGuid()}{extension}";
                 var filePath = Path.Combine(uploadsFolder, fileName);
 
-                // Сохраняем файл
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
 
-                // Возвращаем URL картинки
                 var imageUrl = $"/uploads/{fileName}";
                 return Ok(new { imageUrl, fileName });
             }

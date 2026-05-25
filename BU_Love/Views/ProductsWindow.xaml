@@ -16,7 +16,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
         <Border Grid.Row="0" Background="#2d2d2d" Padding="30,0">
             <Grid>
                 <Button Content="← НАЗАД" Click="BackButton_Click"
@@ -30,7 +29,6 @@
             </Grid>
         </Border>
 
-        <!-- Поиск -->
         <Border Grid.Row="1" Background="#252525" Padding="12,10" Margin="30,15,30,0" CornerRadius="10" 
                 BorderBrush="#333" BorderThickness="1">
             <Grid>
@@ -50,7 +48,6 @@
             </Grid>
         </Border>
 
-        <!-- Товары -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="30,15,30,30">
             <WrapPanel x:Name="ProductsWrapPanel" HorizontalAlignment="Center"/>
         </ScrollViewer>

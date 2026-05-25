@@ -18,7 +18,6 @@ namespace BU_Love.API.Controllers
             _context = context;
         }
 
-        // Создать заказ (доступно всем)
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] CreateOrderDto orderDto)
         {
@@ -35,7 +34,14 @@ namespace BU_Love.API.Controllers
                 if (orderDto.Items == null || !orderDto.Items.Any())
                     return BadRequest("Корзина пуста");
 
-                // Проверяем наличие товаров
+
+                if (!orderDto.Phone.StartsWith("+"))
+                    return BadRequest("Номер телефона должен начинаться с +");
+                if (orderDto.Phone.Length != 12)
+                    return BadRequest("Номер телефона должен содержать + и 11 цифр");
+                if (!orderDto.Phone.Substring(1).All(char.IsDigit))
+                    return BadRequest("Номер телефона должен содержать только цифры после +");
+
                 foreach (var item in orderDto.Items)
                 {
                     var product = await _context.Products.FindAsync(item.ProductId);
@@ -48,7 +54,7 @@ namespace BU_Love.API.Controllers
 
                 var totalAmount = orderDto.Items.Sum(i => i.Price * i.Quantity);
 
-                // Получаем ID пользователя из токена
+
                 var userIdClaim = User.FindFirst("userId")?.Value;
                 User currentUser = null;
 
@@ -57,7 +63,7 @@ namespace BU_Love.API.Controllers
                     currentUser = await _context.Users.FindAsync(userId);
                 }
 
-                // Списание бонусов
+
                 if (orderDto.UseBonusPoints && orderDto.BonusPointsToUse > 0 && currentUser != null)
                 {
                     if (currentUser.BonusPoints >= orderDto.BonusPointsToUse)
@@ -86,7 +92,7 @@ namespace BU_Love.API.Controllers
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
 
-                // Начисление бонусов 1% (только если НЕ списывали)
+
                 if (!orderDto.UseBonusPoints && currentUser != null)
                 {
                     decimal bonusEarned = totalAmount * 0.01m;

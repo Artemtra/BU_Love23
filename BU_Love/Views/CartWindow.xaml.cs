@@ -42,7 +42,6 @@ namespace BU_Love.Views
             }
             else
             {
-                // Показываем нужную панель в зависимости от авторизации
                 if (_isLoggedIn)
                 {
                     GuestDataPanel.Visibility = Visibility.Collapsed;
@@ -235,6 +234,22 @@ namespace BU_Love.Views
                     MessageBox.Show("Введите адрес", "Ошибка");
                     return;
                 }
+
+                if (!phone.StartsWith("+"))
+                {
+                    MessageBox.Show("Номер телефона должен начинаться с +", "Ошибка");
+                    return;
+                }
+                if (phone.Length != 12)
+                {
+                    MessageBox.Show("Номер телефона должен содержать + и 11 цифр\nНапример: +79001234567", "Ошибка");
+                    return;
+                }
+                if (!phone.Substring(1).All(char.IsDigit))
+                {
+                    MessageBox.Show("Номер телефона должен содержать только цифры после +", "Ошибка");
+                    return;
+                }
             }
 
             try
@@ -254,30 +269,16 @@ namespace BU_Love.Views
                 }
 
                 var orderId = await _api.CreateOrderAsync(
-                    customerName,
-                    phone,
-                    address,
-                    items,
-                    useBonus,
-                    bonusToUse);
+                    customerName, phone, address, items, useBonus, bonusToUse);
 
                 _mainVm.CartItems.Clear();
 
                 var finalAmount = totalAmount - bonusToUse;
                 decimal bonusEarned = 0;
 
-                // Обновляем бонусы ТОЛЬКО локально (сервер уже обновил БД)
-                // НЕ вызываем GetProfileAsync, просто считаем локально
-                if (_isLoggedIn && _api.CurrentUser != null)
+                if (_isLoggedIn && !useBonus)
                 {
-                    if (useBonus)
-                    {
-                        bonusEarned = 0; // При списании не начисляем
-                    }
-                    else
-                    {
-                        bonusEarned = finalAmount * 0.01m;
-                    }
+                    bonusEarned = finalAmount * 0.01m;
                 }
 
                 string message = $"✅ Заказ №{orderId} оформлен!\n\n";

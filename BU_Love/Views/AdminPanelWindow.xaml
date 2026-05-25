@@ -15,7 +15,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
         <Border Grid.Row="0" Background="#2d2d2d" Padding="30,0">
             <Grid>
                 <TextBlock Text="🔑 АДМИН-ПАНЕЛЬ" FontSize="28" FontWeight="Bold" Foreground="#FF9800" VerticalAlignment="Center"/>
@@ -37,8 +36,6 @@
 
         <ScrollViewer Grid.Row="1" Margin="30">
             <StackPanel>
-
-                <!-- ====== ТОВАРЫ ====== -->
                 <StackPanel x:Name="ProductsPanel">
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
@@ -56,7 +53,6 @@
                         </StackPanel>
                     </Grid>
 
-                    <!-- Поиск товаров -->
                     <Border Background="#252525" Padding="12,10" CornerRadius="10" Margin="0,0,0,15" BorderBrush="#333" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -75,7 +71,6 @@
                         </Grid>
                     </Border>
 
-                    <!-- Форма товара -->
                     <Border x:Name="ProductForm" Background="#2d2d2d" Padding="25" CornerRadius="10" 
                             Margin="0,0,0,20" Visibility="Collapsed">
                         <StackPanel>
@@ -168,7 +163,6 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Список товаров -->
                     <ItemsControl x:Name="ProductsList">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -197,7 +191,6 @@
                     </ItemsControl>
                 </StackPanel>
 
-                <!-- ====== КАТЕГОРИИ ====== -->
                 <StackPanel x:Name="CategoriesPanel" Visibility="Collapsed">
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
@@ -215,7 +208,6 @@
                         </StackPanel>
                     </Grid>
 
-                    <!-- Поиск категорий -->
                     <Border Background="#252525" Padding="12,10" CornerRadius="10" Margin="0,0,0,15" BorderBrush="#333" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -234,7 +226,6 @@
                         </Grid>
                     </Border>
 
-                    <!-- Форма категории -->
                     <Border x:Name="CategoryForm" Background="#2d2d2d" Padding="25" CornerRadius="10" 
                             Margin="0,0,0,20" Visibility="Collapsed">
                         <StackPanel>
@@ -260,7 +251,6 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Список категорий -->
                     <ItemsControl x:Name="CategoriesList">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -286,7 +276,6 @@
                     </ItemsControl>
                 </StackPanel>
 
-                <!-- ====== ЗАКАЗЫ ====== -->
 
                 <StackPanel x:Name="OrdersPanel" Visibility="Collapsed">
                     <Grid Margin="0,0,0,10">
@@ -305,7 +294,6 @@
                         </StackPanel>
                     </Grid>
 
-                    <!-- Поиск заказов -->
                     <Border Background="#252525" Padding="12,10" CornerRadius="10" Margin="0,0,0,15" BorderBrush="#333" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>

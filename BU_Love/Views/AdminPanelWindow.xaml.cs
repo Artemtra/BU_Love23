@@ -57,7 +57,6 @@ namespace BU_Love.Views
             }
         }
 
-        // ===== ПОИСК =====
         private void ProductSearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var search = ProductSearchBox.Text?.ToLower() ?? "";
@@ -90,7 +89,6 @@ namespace BU_Love.Views
 
         private void ClearCategorySearch_Click(object sender, RoutedEventArgs e) => CategorySearchBox.Text = "";
 
-        // ===== ЗАГРУЗКА =====
         private void LoadCategoriesIntoComboBox()
         {
             ProductCategoryCombo.ItemsSource = _categories.OrderBy(c => c.Name).ToList();
@@ -116,7 +114,6 @@ namespace BU_Love.Views
             CategoriesList.ItemsSource = _categories.OrderBy(c => c.Name).ToList();
         }
 
-        // ===== НАВИГАЦИЯ =====
         private void ShowProducts_Click(object sender, RoutedEventArgs e)
         { ProductsPanel.Visibility = Visibility.Visible; CategoriesPanel.Visibility = Visibility.Collapsed; OrdersPanel.Visibility = Visibility.Collapsed; }
 
@@ -126,7 +123,6 @@ namespace BU_Love.Views
         private void ShowOrders_Click(object sender, RoutedEventArgs e)
         { ProductsPanel.Visibility = Visibility.Collapsed; CategoriesPanel.Visibility = Visibility.Collapsed; OrdersPanel.Visibility = Visibility.Visible; ShowOrders(); }
 
-        // ===== ТОВАРЫ =====
         private void AddProduct_Click(object sender, RoutedEventArgs e)
         {
             _editingProductId = 0; _productImageUrl = "";
@@ -225,7 +221,6 @@ namespace BU_Love.Views
             }
         }
 
-        // ===== КАТЕГОРИИ =====
         private void AddCategory_Click(object sender, RoutedEventArgs e)
         {
             _editingCategoryId = 0; _categoryImageUrl = "";
@@ -292,7 +287,6 @@ namespace BU_Love.Views
             }
         }
 
-        // ===== ЗАКАЗЫ =====
         private void ShowOrders()
         {
             OrdersList.Children.Clear();
@@ -309,7 +303,6 @@ namespace BU_Love.Views
                 return;
             }
 
-            // Фильтрация по поиску
             var filteredOrders = _orders.AsEnumerable();
             if (!string.IsNullOrEmpty(_orderSearchText))
             {

@@ -1,69 +1,104 @@
 ﻿<Window x:Class="BU_Love.Views.ProfileWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Профиль" Width="800" Height="800"
+        Title="Профиль" Width="500" Height="650"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent">
 
     <Border Background="#1a1a1a" CornerRadius="15" BorderBrush="#FF9800" BorderThickness="2">
         <Grid Margin="30">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <!-- Заголовок -->
-            <Grid Grid.Row="0" Margin="0,0,0,20">
-                <TextBlock x:Name="ProfileTitle" Text="👤 Профиль" FontSize="28" FontWeight="Bold" 
-                           Foreground="#FF9800" HorizontalAlignment="Left"/>
-                <Button Content="✕" Click="CloseButton_Click" HorizontalAlignment="Right"
-                        Background="#ff4444" Foreground="White" Width="40" Height="40"
-                        FontSize="20" BorderThickness="0" Cursor="Hand"/>
-            </Grid>
+            <StackPanel x:Name="ProfileSection" Grid.Column="0">
+                <Grid Margin="0,0,0,15">
+                    <TextBlock Text="👤 ПРОФИЛЬ" FontSize="24" FontWeight="Bold" Foreground="#FF9800"/>
+                    <Button Content="✕" Click="CloseButton_Click" HorizontalAlignment="Right"
+                            Background="#ff4444" Foreground="White" Width="35" Height="35"
+                            FontSize="18" BorderThickness="0" Cursor="Hand"/>
+                </Grid>
 
-            <!-- Контент -->
-            <StackPanel Grid.Row="1">
-                <!-- Информация о пользователе -->
-                <Border Background="#2d2d2d" CornerRadius="10" Padding="20" Margin="0,0,0,20">
+                <TextBlock Text="Логин" Margin="0,0,0,5"/>
+                <TextBox x:Name="UsernameTextBox" FontSize="16" Padding="10" 
+                         Background="#2d2d2d" Foreground="White" BorderBrush="#4a4a4a" 
+                         IsReadOnly="True" Margin="0,0,0,15"/>
+
+                <TextBlock Text="Телефон" Margin="0,0,0,5"/>
+                <TextBox x:Name="PhoneTextBox" FontSize="16" Padding="10" 
+                         Background="#2d2d2d" Foreground="White" BorderBrush="#4a4a4a" 
+                         IsReadOnly="True" Margin="0,0,0,5"/>
+                <Button x:Name="EditPhoneBtn" Content="✏️ Изменить" Click="EditPhone_Click"
+                        Background="Transparent" Foreground="#FF9800" FontSize="12"
+                        BorderThickness="0" Cursor="Hand" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                <TextBlock Text="Адрес" Margin="0,0,0,5"/>
+                <TextBox x:Name="AddressTextBox" FontSize="16" Padding="10" 
+                         Background="#2d2d2d" Foreground="White" BorderBrush="#4a4a4a" 
+                         IsReadOnly="True" Height="60" TextWrapping="Wrap" Margin="0,0,0,5"/>
+                <Button x:Name="EditAddressBtn" Content="✏️ Изменить" Click="EditAddress_Click"
+                        Background="Transparent" Foreground="#FF9800" FontSize="12"
+                        BorderThickness="0" Cursor="Hand" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                <Border Background="#2d2d2d" CornerRadius="8" Padding="15" Margin="0,5,0,10">
                     <StackPanel>
-                        <TextBlock x:Name="UsernameText" FontSize="24" FontWeight="Bold" Foreground="White"/>
-                        <TextBlock x:Name="PhoneText" FontSize="16" Foreground="#aaaaaa" Margin="0,5,0,0"/>
-                        <TextBlock x:Name="AddressText" FontSize="16" Foreground="#aaaaaa" Margin="0,5,0,0"/>
-                        <Border Background="#4CAF50" CornerRadius="5" Padding="10,5" 
-                                HorizontalAlignment="Left" Margin="0,10,0,0">
-                            <TextBlock x:Name="BonusText" FontSize="18" FontWeight="Bold" Foreground="White"/>
-                        </Border>
+                        <TextBlock x:Name="BonusText" FontSize="18" FontWeight="Bold" Foreground="#4CAF50"/>
+                        <TextBlock Text="1% от каждой покупки начисляется бонусами" FontSize="12" 
+                                   Foreground="#aaaaaa" Margin="0,3,0,0"/>
                     </StackPanel>
                 </Border>
 
-                <!-- Кнопки действий -->
-                <Grid Margin="0,0,0,20">
+                <Grid Margin="0,10,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-
                     <Button Grid.Column="0" Content="🛒 КОРЗИНА" Click="CartButton_Click"
-                            Background="#2196F3" Foreground="White" FontSize="18" FontWeight="Bold"
-                            Padding="20,15" BorderThickness="0" Cursor="Hand" Margin="0,0,10,0"/>
-
-                    <Button Grid.Column="1" Content="📋 ИСТОРИЯ ЗАКАЗОВ" Click="OrdersButton_Click"
-                            Background="#FF9800" Foreground="White" FontSize="18" FontWeight="Bold"
-                            Padding="20,15" BorderThickness="0" Cursor="Hand"/>
+                            Background="#2196F3" Foreground="White" FontSize="16" FontWeight="Bold"
+                            Padding="15,10" BorderThickness="0" Cursor="Hand"/>
+                    <Button Grid.Column="2" Content="📋 ИСТОРИЯ" Click="OrdersButton_Click"
+                            Background="#FF9800" Foreground="White" FontSize="16" FontWeight="Bold"
+                            Padding="15,10" BorderThickness="0" Cursor="Hand"/>
                 </Grid>
 
-                <!-- История заказов -->
-                <ScrollViewer x:Name="OrdersScrollViewer" Visibility="Collapsed" MaxHeight="550">
-                    <StackPanel x:Name="OrdersPanel"/>
-                </ScrollViewer>
+                <StackPanel x:Name="SavePanel" Visibility="Collapsed" Orientation="Horizontal" 
+                            HorizontalAlignment="Right" Margin="0,10,0,0">
+                    <Button Content="💾 Сохранить" Click="SaveProfile_Click"
+                            Background="#4CAF50" Foreground="White" FontSize="14" FontWeight="Bold"
+                            Padding="12,8" BorderThickness="0" Cursor="Hand" Margin="0,0,5,0"/>
+                    <Button Content="❌ Отмена" Click="CancelEdit_Click"
+                            Background="#666" Foreground="White" FontSize="14" FontWeight="Bold"
+                            Padding="12,8" BorderThickness="0" Cursor="Hand"/>
+                </StackPanel>
+
+                <Button Content="🚪 ВЫЙТИ" Click="LogoutButton_Click"
+                        Background="#ff4444" Foreground="White" FontSize="16" FontWeight="Bold"
+                        Padding="15" BorderThickness="0" Cursor="Hand" Margin="0,15,0,0"/>
             </StackPanel>
 
-            <!-- Кнопка выхода -->
-            <Button Grid.Row="2" Content="🚪 ВЫЙТИ ИЗ АККАУНТА" Click="LogoutButton_Click"
-                    Background="#ff4444" Foreground="White" FontSize="16" FontWeight="Bold"
-                    Padding="15" BorderThickness="0" Cursor="Hand"/>
+            <Border x:Name="OrdersSection" Grid.Column="0" Background="#1a1a1a" CornerRadius="12" 
+                    Padding="20" Visibility="Collapsed" Margin="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Grid Grid.Row="0" Margin="0,0,0,15">
+                        <TextBlock Text="📋 ИСТОРИЯ ЗАКАЗОВ" FontSize="20" FontWeight="Bold" 
+                                   Foreground="#FF9800"/>
+                        <Button Content="← НАЗАД" Click="HideOrders_Click" HorizontalAlignment="Right"
+                                Background="Transparent" Foreground="#FF9800" FontSize="14"
+                                BorderThickness="0" Cursor="Hand"/>
+                    </Grid>
+                    
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="OrdersPanel"/>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
         </Grid>
     </Border>
 </Window>

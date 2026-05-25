@@ -71,7 +71,6 @@ namespace BU_Love.API.Controllers
 
             try
             {
-                // Получаем все категории
                 var allCategories = await _context.Categories.ToListAsync();
 
                 if (!allCategories.Any())
@@ -79,34 +78,29 @@ namespace BU_Love.API.Controllers
                     return Ok(new { message = "Нет категорий для удаления" });
                 }
 
-                // Получаем ID всех категорий
                 var categoryIds = allCategories.Select(c => c.Id).ToList();
 
-                // Находим все товары в этих категориях
                 var productsToDelete = await _context.Products
                     .Where(p => categoryIds.Contains(p.CategoryId))
                     .ToListAsync();
 
-                // Сохраняем ID товаров для истории заказов
                 var productIds = productsToDelete.Select(p => p.Id).ToList();
-                
-                //Обновляем OrderItems - сохраняем информацию о товаре, но убираем связь
+
                 var orderItems = await _context.Orderitems
                     .Where(oi => oi.ProductId.HasValue && productIds.Contains(oi.ProductId.Value))
                     .ToListAsync();
 
                 foreach (var item in orderItems)
                 {
-                    // Сохраняем название товара в описании (если есть такое поле)
+
                     var product = productsToDelete.FirstOrDefault(p => p.Id == item.ProductId);
                     if (product != null)
                     {
-                        // Можно сохранить информацию о товаре в комментарий или другое поле
-                        // item.ProductName = product.Name; // если добавите такое поле
+
                     }
                 }
 
-                // Удаляем товары
+
                 if (productsToDelete.Any())
                 {
                     _context.Products.RemoveRange(productsToDelete);

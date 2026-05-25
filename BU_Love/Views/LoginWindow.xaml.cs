@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using BU_Love.Services;
@@ -9,6 +10,8 @@ namespace BU_Love.Views
     {
         private readonly ApiService _api;
         private bool _isLoginMode = true;
+        private bool _loginPasswordVisible = false;
+        private bool _regPasswordVisible = false;
 
         public LoginWindow(ApiService api)
         {
@@ -48,6 +51,46 @@ namespace BU_Love.Views
             BonusInfo.Text = "🎁 100 приветственных бонусов!";
         }
 
+        private void ToggleLoginPassword_Click(object sender, RoutedEventArgs e)
+        {
+            _loginPasswordVisible = !_loginPasswordVisible;
+
+            if (_loginPasswordVisible)
+            {
+                LoginPasswordVisible.Text = LoginPassword.Password;
+                LoginPassword.Visibility = Visibility.Collapsed;
+                LoginPasswordVisible.Visibility = Visibility.Visible;
+                LoginEyeBtn.Content = "👁‍🗨";
+            }
+            else
+            {
+                LoginPassword.Password = LoginPasswordVisible.Text;
+                LoginPassword.Visibility = Visibility.Visible;
+                LoginPasswordVisible.Visibility = Visibility.Collapsed;
+                LoginEyeBtn.Content = "👁";
+            }
+        }
+
+        private void ToggleRegPassword_Click(object sender, RoutedEventArgs e)
+        {
+            _regPasswordVisible = !_regPasswordVisible;
+
+            if (_regPasswordVisible)
+            {
+                RegPasswordVisible.Text = RegPassword.Password;
+                RegPassword.Visibility = Visibility.Collapsed;
+                RegPasswordVisible.Visibility = Visibility.Visible;
+                RegEyeBtn.Content = "👁‍🗨";
+            }
+            else
+            {
+                RegPassword.Password = RegPasswordVisible.Text;
+                RegPassword.Visibility = Visibility.Visible;
+                RegPasswordVisible.Visibility = Visibility.Collapsed;
+                RegEyeBtn.Content = "👁";
+            }
+        }
+
         private async void SubmitButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -64,7 +107,9 @@ namespace BU_Love.Views
                     }
 
                     SubmitBtn.Content = "ВХОД...";
-                    var user = await _api.LoginAsync(LoginUsername.Text.Trim(), LoginPassword.Password);
+
+                    string password = _loginPasswordVisible ? LoginPasswordVisible.Text : LoginPassword.Password;
+                    var user = await _api.LoginAsync(LoginUsername.Text.Trim(), password);
 
                     MessageBox.Show($"Добро пожаловать, {user.Username}!\nБонусов: {user.BonusPointsDisplay}", "Успех");
 
@@ -82,12 +127,28 @@ namespace BU_Love.Views
                         return;
                     }
 
+                    string phone = RegPhone.Text.Trim();
+                    if (!phone.StartsWith("+"))
+                    {
+                        MessageBox.Show("Номер телефона должен начинаться с +", "Ошибка");
+                        return;
+                    }
+                    if (phone.Length != 12)
+                    {
+                        MessageBox.Show("Номер телефона должен содержать + и 11 цифр\nНапример: +79001234567", "Ошибка");
+                        return;
+                    }
+                    if (!phone.Substring(1).All(char.IsDigit))
+                    {
+                        MessageBox.Show("Номер телефона должен содержать только цифры после +", "Ошибка");
+                        return;
+                    }
+
                     SubmitBtn.Content = "РЕГИСТРАЦИЯ...";
+
+                    string password = _regPasswordVisible ? RegPasswordVisible.Text : RegPassword.Password;
                     var user = await _api.RegisterAsync(
-                        RegUsername.Text.Trim(),
-                        RegPassword.Password,
-                        RegPhone.Text.Trim(),
-                        RegAddress.Text.Trim());
+                        RegUsername.Text.Trim(), password, phone, RegAddress.Text.Trim());
 
                     MessageBox.Show($"Регистрация успешна!\nДобро пожаловать, {user.Username}!\nНачислено 100 бонусов!", "Успех");
 

@@ -48,7 +48,6 @@ namespace BU_Love.Services
             }
         }
 
-        // ===== ТОВАРЫ =====
         public async Task<Product> CreateProductAsync(Product product)
         {
             var response = await _httpClient.PostAsJsonAsync("api/products", product);
@@ -77,8 +76,6 @@ namespace BU_Love.Services
                 throw new Exception($"Ошибка удаления всех товаров: {response.StatusCode} - {error}");
             }
         }
-
-        // ===== КАТЕГОРИИ =====
         public async Task<Category> CreateCategoryAsync(Category category)
         {
             var response = await _httpClient.PostAsJsonAsync("api/categories", category);
@@ -107,8 +104,26 @@ namespace BU_Love.Services
                 throw new Exception($"Ошибка удаления всех категорий: {response.StatusCode} - {error}");
             }
         }
+        public async Task UpdateProfileAsync(string phone, string address)
+        {
+            var data = new { phone, address };
+            var response = await _httpClient.PutAsJsonAsync("api/auth/profile", data);
 
-        // ===== АВТОРИЗАЦИЯ =====
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Ошибка обновления профиля: {error}");
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<AuthResult>();
+
+            if (_currentUser != null)
+            {
+                _currentUser.Phone = result.Phone;
+                _currentUser.Address = result.Address;
+            }
+        }
+
         public async Task<UserProfile> LoginAsync(string username, string password)
         {
             var response = await _httpClient.PostAsJsonAsync("api/auth/login",
@@ -168,7 +183,6 @@ namespace BU_Love.Services
             _currentUser = null;
         }
 
-        // ===== КАТЕГОРИИ (получение) =====
         public async Task<List<Category>> GetCategoriesAsync()
         {
             var response = await _httpClient.GetAsync("api/categories");
@@ -176,7 +190,6 @@ namespace BU_Love.Services
             return await response.Content.ReadFromJsonAsync<List<Category>>();
         }
 
-        // ===== ТОВАРЫ (получение) =====
         public async Task<List<Product>> GetProductsAsync(int? categoryId = null)
         {
             var url = categoryId.HasValue
@@ -188,7 +201,6 @@ namespace BU_Love.Services
             return await response.Content.ReadFromJsonAsync<List<Product>>();
         }
 
-        // ===== ЗАКАЗЫ =====
         public async Task DeleteOrderAsync(int orderId)
         {
             var response = await _httpClient.DeleteAsync($"api/orders/{orderId}");
@@ -228,7 +240,6 @@ namespace BU_Love.Services
                 })
             };
 
-            // Проверяем, передан ли токен
             Console.WriteLine($"Token: {_httpClient.DefaultRequestHeaders.Authorization}");
 
             var response = await _httpClient.PostAsJsonAsync("api/orders", orderData);
@@ -260,7 +271,6 @@ namespace BU_Love.Services
             return await response.Content.ReadFromJsonAsync<List<Order>>();
         }
 
-        // ===== ПРОФИЛЬ =====
         public async Task<UserProfile> GetProfileAsync()
         {
             var response = await _httpClient.GetAsync("api/auth/profile");
@@ -298,7 +308,6 @@ namespace BU_Love.Services
             catch { }
         }
 
-        // ===== ЗАГРУЗКА ИЗОБРАЖЕНИЙ =====
         public async Task<string> UploadImageAsync(string filePath)
         {
             using var form = new MultipartFormDataContent();
@@ -318,7 +327,6 @@ namespace BU_Love.Services
             return result?.ImageUrl ?? "";
         }
 
-        // ===== ВСПОМОГАТЕЛЬНЫЕ КЛАССЫ =====
         private class UploadResult
         {
             public string ImageUrl { get; set; } = string.Empty;

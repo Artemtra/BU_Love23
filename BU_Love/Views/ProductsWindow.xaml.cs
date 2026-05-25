@@ -146,7 +146,6 @@ namespace BU_Love.Views
             }
         }
 
-        // ===== ПОИСК =====
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var searchText = SearchBox.Text?.Trim().ToLower() ?? "";

@@ -31,12 +31,10 @@
                 <ColumnDefinition Width="400"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Левая часть -->
             <ScrollViewer Grid.Column="0" Margin="30">
                 <StackPanel>
                     <StackPanel x:Name="CartItemsPanel"/>
 
-                    <!-- Поля для НЕавторизованного пользователя -->
                     <Border x:Name="GuestDataPanel" Background="#2d2d2d" Padding="20" CornerRadius="10" 
                             Margin="0,20,0,0" Visibility="Collapsed">
                         <StackPanel>
@@ -60,7 +58,6 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- Правая часть -->
             <Border Grid.Column="1" Background="#2d2d2d" Padding="30">
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="ИТОГО" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
@@ -74,7 +71,6 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Бонусы (только для авторизованных) -->
                     <Border x:Name="BonusPanel" Background="#1a1a1a" Padding="15" CornerRadius="10" 
                             Margin="0,0,0,20" Visibility="Collapsed">
                         <StackPanel>
