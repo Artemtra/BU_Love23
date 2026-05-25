@@ -15,6 +15,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Header -->
         <Border Grid.Row="0" Background="#2d2d2d" Padding="30,0">
             <Grid>
                 <TextBlock Text="🔑 АДМИН-ПАНЕЛЬ" FontSize="28" FontWeight="Bold" Foreground="#FF9800" VerticalAlignment="Center"/>
@@ -44,59 +45,62 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <TextBlock Grid.Column="0" Text="📦 ТОВАРЫ" FontSize="26" FontWeight="Bold" VerticalAlignment="Center"/>
-
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <Button Content="➕ Добавить товар" Click="AddProduct_Click"
                                     Background="#4CAF50" Foreground="White" FontSize="16" FontWeight="Bold"
                                     Padding="15,10" BorderThickness="0" Cursor="Hand" Margin="0,0,10,0"/>
-
-                            <!-- Кнопка "Удалить все товары" -->
                             <Button Content="🗑️ Удалить всё" Click="DeleteAllProducts_Click"
                                     Background="#D32F2F" Foreground="White" FontSize="16" FontWeight="Bold"
                                     Padding="15,10" BorderThickness="0" Cursor="Hand"/>
                         </StackPanel>
                     </Grid>
 
+                    <!-- Поиск товаров -->
+                    <Border Background="#252525" Padding="12,10" CornerRadius="10" Margin="0,0,0,15" BorderBrush="#333" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="🔍" FontSize="18" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBox x:Name="ProductSearchBox" Grid.Column="1" 
+                                     Background="#2d2d2d" Foreground="White" BorderBrush="#555"
+                                     BorderThickness="2" FontSize="15" Padding="12,10"
+                                     CaretBrush="#FF9800" TextChanged="ProductSearchBox_TextChanged"/>
+                            <Button Grid.Column="2" Content="✕" Click="ClearProductSearch_Click"
+                                    Background="Transparent" Foreground="#888" FontSize="16" 
+                                    BorderThickness="0" Cursor="Hand" Margin="10,0,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Форма товара -->
                     <Border x:Name="ProductForm" Background="#2d2d2d" Padding="25" CornerRadius="10" 
-        Margin="0,0,0,20" Visibility="Collapsed">
+                            Margin="0,0,0,20" Visibility="Collapsed">
                         <StackPanel>
                             <TextBlock x:Name="ProductFormTitle" Text="Добавление товара" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
-
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-
                                 <StackPanel Grid.Column="0" Margin="0,0,15,0">
                                     <TextBlock Text="Название" Margin="0,0,0,5"/>
                                     <TextBox x:Name="ProductName" FontSize="16" Padding="10" Background="#1a1a1a" 
-                         Foreground="White" BorderBrush="#4a4a4a" Margin="0,0,0,10"/>
-
+                                             Foreground="White" BorderBrush="#4a4a4a" Margin="0,0,0,10"/>
                                     <TextBlock Text="Описание" Margin="0,0,0,5"/>
                                     <TextBox x:Name="ProductDesc" FontSize="16" Padding="10" Background="#1a1a1a" 
-                         Foreground="White" BorderBrush="#4a4a4a" Height="80" TextWrapping="Wrap" Margin="0,0,0,10"/>
-
+                                             Foreground="White" BorderBrush="#4a4a4a" Height="80" TextWrapping="Wrap" Margin="0,0,0,10"/>
                                     <TextBlock Text="Цена" Margin="0,0,0,5"/>
                                     <TextBox x:Name="ProductPrice" FontSize="16" Padding="10" Background="#1a1a1a" 
-                         Foreground="White" BorderBrush="#4a4a4a" Margin="0,0,0,10"/>
+                                             Foreground="White" BorderBrush="#4a4a4a" Margin="0,0,0,10"/>
                                 </StackPanel>
-
                                 <StackPanel Grid.Column="1">
-                                    <!-- Выпадающий список категорий -->
                                     <TextBlock Text="Категория" Margin="0,0,0,5"/>
-                                    <ComboBox x:Name="ProductCategoryCombo" 
-                          FontSize="16" 
-                          Padding="10" 
-                          Background="#1a1a1a" 
-                          Foreground="White" 
-                          BorderBrush="#4a4a4a"
-                          Margin="0,0,0,10"
-                          DisplayMemberPath="Name"
-                          SelectedValuePath="Id"
-                          IsEditable="False">
+                                    <ComboBox x:Name="ProductCategoryCombo" FontSize="16" Padding="10" 
+                                              Background="#1a1a1a" Foreground="White" BorderBrush="#4a4a4a"
+                                              Margin="0,0,0,10" DisplayMemberPath="Name" SelectedValuePath="Id">
                                         <ComboBox.ItemContainerStyle>
                                             <Style TargetType="ComboBoxItem">
                                                 <Setter Property="Background" Value="#2d2d2d"/>
@@ -116,20 +120,12 @@
                                             </Style>
                                         </ComboBox.ItemContainerStyle>
                                     </ComboBox>
-
                                     <TextBlock Text="Количество" Margin="0,0,0,5"/>
                                     <TextBox x:Name="ProductStock" FontSize="16" Padding="10" Background="#1a1a1a" 
-                         Foreground="White" BorderBrush="#4a4a4a" Margin="0,0,0,10"/>
-
-                                    <!-- Выпадающий список состояния -->
+                                             Foreground="White" BorderBrush="#4a4a4a" Margin="0,0,0,10"/>
                                     <TextBlock Text="Состояние" Margin="0,0,0,5"/>
-                                    <ComboBox x:Name="ProductConditionCombo" 
-                          FontSize="16" 
-                          Padding="10" 
-                          Background="#1a1a1a" 
-                          Foreground="White" 
-                          BorderBrush="#4a4a4a"
-                          Margin="0,0,0,10">
+                                    <ComboBox x:Name="ProductConditionCombo" FontSize="16" Padding="10" 
+                                              Background="#1a1a1a" Foreground="White" BorderBrush="#4a4a4a" Margin="0,0,0,10">
                                         <ComboBoxItem Content="Отличное" Tag="Excellent"/>
                                         <ComboBoxItem Content="Хорошее" Tag="Good"/>
                                         <ComboBoxItem Content="Удовлетворительное" Tag="Fair"/>
@@ -154,28 +150,26 @@
                                     </ComboBox>
                                 </StackPanel>
                             </Grid>
-
                             <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
                                 <Button Content="📷 Выбрать фото" Click="UploadProductImage_Click"
-                    Background="#FF9800" Foreground="White" FontSize="14" FontWeight="Bold"
-                    Padding="15,8" BorderThickness="0" Cursor="Hand"/>
+                                        Background="#FF9800" Foreground="White" FontSize="14" FontWeight="Bold"
+                                        Padding="15,8" BorderThickness="0" Cursor="Hand"/>
                                 <TextBlock x:Name="ProductImagePath" Text="" FontSize="12" Foreground="#aaaaaa" 
-                       VerticalAlignment="Center" Margin="15,0,0,0"/>
+                                           VerticalAlignment="Center" Margin="15,0,0,0"/>
                             </StackPanel>
-
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
                                 <Button Content="💾 Сохранить" Click="SaveProduct_Click"
-                    Background="#4CAF50" Foreground="White" FontSize="16" FontWeight="Bold"
-                    Padding="20,10" BorderThickness="0" Cursor="Hand" Margin="0,0,10,0"/>
+                                        Background="#4CAF50" Foreground="White" FontSize="16" FontWeight="Bold"
+                                        Padding="20,10" BorderThickness="0" Cursor="Hand" Margin="0,0,10,0"/>
                                 <Button Content="❌ Отмена" Click="CancelForm_Click"
-                    Background="#ff4444" Foreground="White" FontSize="16" FontWeight="Bold"
-                    Padding="20,10" BorderThickness="0" Cursor="Hand"/>
+                                        Background="#ff4444" Foreground="White" FontSize="16" FontWeight="Bold"
+                                        Padding="20,10" BorderThickness="0" Cursor="Hand"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
 
                     <!-- Список товаров -->
-                    <ItemsControl x:Name="ProductsList" ItemsSource="{Binding Products}">
+                    <ItemsControl x:Name="ProductsList">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Padding="12" Margin="0,5" Background="#2d2d2d" CornerRadius="8">
@@ -210,30 +204,44 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <TextBlock Grid.Column="0" Text="📁 КАТЕГОРИИ" FontSize="26" FontWeight="Bold" VerticalAlignment="Center"/>
-
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <Button Content="➕ Добавить категорию" Click="AddCategory_Click"
                                     Background="#9C27B0" Foreground="White" FontSize="16" FontWeight="Bold"
                                     Padding="15,10" BorderThickness="0" Cursor="Hand" Margin="0,0,10,0"/>
-
-                            <!-- Кнопка "Удалить все категории" -->
                             <Button Content="🗑️ Удалить всё" Click="DeleteAllCategories_Click"
                                     Background="#D32F2F" Foreground="White" FontSize="16" FontWeight="Bold"
                                     Padding="15,10" BorderThickness="0" Cursor="Hand"/>
                         </StackPanel>
                     </Grid>
 
+                    <!-- Поиск категорий -->
+                    <Border Background="#252525" Padding="12,10" CornerRadius="10" Margin="0,0,0,15" BorderBrush="#333" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="🔍" FontSize="18" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBox x:Name="CategorySearchBox" Grid.Column="1" 
+                                     Background="#2d2d2d" Foreground="White" BorderBrush="#555"
+                                     BorderThickness="2" FontSize="15" Padding="12,10"
+                                     CaretBrush="#FF9800" TextChanged="CategorySearchBox_TextChanged"/>
+                            <Button Grid.Column="2" Content="✕" Click="ClearCategorySearch_Click"
+                                    Background="Transparent" Foreground="#888" FontSize="16" 
+                                    BorderThickness="0" Cursor="Hand" Margin="10,0,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Форма категории -->
                     <Border x:Name="CategoryForm" Background="#2d2d2d" Padding="25" CornerRadius="10" 
                             Margin="0,0,0,20" Visibility="Collapsed">
                         <StackPanel>
                             <TextBlock x:Name="CategoryFormTitle" Text="Добавление категории" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
-
                             <TextBlock Text="Название" Margin="0,0,0,5"/>
                             <TextBox x:Name="CategoryName" FontSize="16" Padding="10" Background="#1a1a1a" 
                                      Foreground="White" BorderBrush="#4a4a4a" Width="400" Margin="0,0,0,10"/>
-
                             <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                                 <Button Content="📷 Выбрать фото" Click="UploadCategoryImage_Click"
                                         Background="#FF9800" Foreground="White" FontSize="14" FontWeight="Bold"
@@ -241,7 +249,6 @@
                                 <TextBlock x:Name="CategoryImagePath" Text="" FontSize="12" Foreground="#aaaaaa" 
                                            VerticalAlignment="Center" Margin="15,0,0,0"/>
                             </StackPanel>
-
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
                                 <Button Content="💾 Сохранить" Click="SaveCategory_Click"
                                         Background="#9C27B0" Foreground="White" FontSize="16" FontWeight="Bold"
@@ -253,7 +260,8 @@
                         </StackPanel>
                     </Border>
 
-                    <ItemsControl x:Name="CategoriesList" ItemsSource="{Binding Categories}">
+                    <!-- Список категорий -->
+                    <ItemsControl x:Name="CategoriesList">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Padding="12" Margin="0,5" Background="#2d2d2d" CornerRadius="8">
@@ -279,30 +287,44 @@
                 </StackPanel>
 
                 <!-- ====== ЗАКАЗЫ ====== -->
+
                 <StackPanel x:Name="OrdersPanel" Visibility="Collapsed">
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <TextBlock Grid.Column="0" Text="📋 ИСТОРИЯ ЗАКАЗОВ" FontSize="26" FontWeight="Bold" VerticalAlignment="Center"/>
-
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <Button Content="🔄 Обновить" Click="RefreshOrders_Click"
-                                    Background="#2196F3" Foreground="White" FontSize="14" FontWeight="Bold"
-                                    Padding="12,8" BorderThickness="0" Cursor="Hand" Margin="0,0,10,0"/>
-
-                            <!-- Кнопка "Удалить все заказы" -->
+                    Background="#2196F3" Foreground="White" FontSize="14" FontWeight="Bold"
+                    Padding="12,8" BorderThickness="0" Cursor="Hand" Margin="0,0,10,0"/>
                             <Button Content="🗑️ Удалить всё" Click="DeleteAllOrders_Click"
-                                    Background="#D32F2F" Foreground="White" FontSize="14" FontWeight="Bold"
-                                    Padding="12,8" BorderThickness="0" Cursor="Hand"/>
+                    Background="#D32F2F" Foreground="White" FontSize="14" FontWeight="Bold"
+                    Padding="12,8" BorderThickness="0" Cursor="Hand"/>
                         </StackPanel>
                     </Grid>
 
-                    <StackPanel x:Name="OrdersList">
+                    <!-- Поиск заказов -->
+                    <Border Background="#252525" Padding="12,10" CornerRadius="10" Margin="0,0,0,15" BorderBrush="#333" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="🔍" FontSize="18" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBox x:Name="OrderSearchBox" Grid.Column="1" 
+                     Background="#2d2d2d" Foreground="White" BorderBrush="#555"
+                     BorderThickness="2" FontSize="15" Padding="12,10"
+                     CaretBrush="#FF9800" TextChanged="OrderSearchBox_TextChanged"/>
+                            <Button Grid.Column="2" Content="✕" Click="ClearOrderSearch_Click"
+                    Background="Transparent" Foreground="#888" FontSize="16" 
+                    BorderThickness="0" Cursor="Hand" Margin="10,0,0,0"/>
+                        </Grid>
+                    </Border>
 
-                    </StackPanel>
+                    <StackPanel x:Name="OrdersList"/>
                 </StackPanel>
 
             </StackPanel>
