@@ -94,7 +94,7 @@
                                 <StackPanel Grid.Column="1">
                                     <TextBlock Text="Категория" Margin="0,0,0,5"/>
                                     <ComboBox x:Name="ProductCategoryCombo" FontSize="16" Padding="10" 
-                                              Background="#1a1a1a" Foreground="White" BorderBrush="#4a4a4a"
+                                              Background="#1a1a1a" Foreground="Black" BorderBrush="#4a4a4a"
                                               Margin="0,0,0,10" DisplayMemberPath="Name" SelectedValuePath="Id">
                                         <ComboBox.ItemContainerStyle>
                                             <Style TargetType="ComboBoxItem">
@@ -109,7 +109,7 @@
                                                     </Trigger>
                                                     <Trigger Property="IsSelected" Value="True">
                                                         <Setter Property="Background" Value="#FF9800"/>
-                                                        <Setter Property="Foreground" Value="White"/>
+                                                        <Setter Property="Foreground" Value="Black"/>
                                                     </Trigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -120,7 +120,7 @@
                                              Foreground="White" BorderBrush="#4a4a4a" Margin="0,0,0,10"/>
                                     <TextBlock Text="Состояние" Margin="0,0,0,5"/>
                                     <ComboBox x:Name="ProductConditionCombo" FontSize="16" Padding="10" 
-                                              Background="#1a1a1a" Foreground="White" BorderBrush="#4a4a4a" Margin="0,0,0,10">
+                                              Background="#1a1a1a" Foreground="Black" BorderBrush="#4a4a4a" Margin="0,0,0,10">
                                         <ComboBoxItem Content="Отличное" Tag="Excellent"/>
                                         <ComboBoxItem Content="Хорошее" Tag="Good"/>
                                         <ComboBoxItem Content="Удовлетворительное" Tag="Fair"/>
@@ -137,7 +137,7 @@
                                                     </Trigger>
                                                     <Trigger Property="IsSelected" Value="True">
                                                         <Setter Property="Background" Value="#FF9800"/>
-                                                        <Setter Property="Foreground" Value="White"/>
+                                                        <Setter Property="Foreground" Value="Black"/>
                                                     </Trigger>
                                                 </Style.Triggers>
                                             </Style>
