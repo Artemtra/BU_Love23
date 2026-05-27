@@ -257,7 +257,7 @@ private void CartButton_Click(object sender, RoutedEventArgs e)
                 string s when s.Contains("аксессуар") => "🎧",
                 string s when s.Contains("часы") || s.Contains("watch") => "⌚",
                 string s when s.Contains("аудио") || s.Contains("наушник") => "🎵",
-                string s when s.Contains("игровые приставки") || s.Contains("приставк") => "🎮",
+                string s when s.Contains("игровые приставки") || s.Contains("приставка") => "🎮",
                 string s when s.Contains("монитор") || s.Contains("экран") => "🖥️",
                 string s when s.Contains("клавиатура") => "⌨️",
                 string s when s.Contains("мышка") || s.Contains("mouse") => "🖱️",
