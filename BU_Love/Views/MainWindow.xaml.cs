@@ -251,16 +251,16 @@ private void CartButton_Click(object sender, RoutedEventArgs e)
             return categoryName.ToLower() switch
             {
                 string s when s.Contains("смартфон") || s.Contains("телефон") => "📱",
-                string s when s.Contains("ноутбук") || s.Contains("лэптоп") => "💻",
+                string s when s.Contains("ноутбук") => "💻",
                 string s when s.Contains("планшет") => "📱",
-                string s when s.Contains("комплектующ") || s.Contains("запчаст") => "🔧",
+                string s when s.Contains("комплектующие") || s.Contains("запчасти") => "🔧",
                 string s when s.Contains("аксессуар") => "🎧",
                 string s when s.Contains("часы") || s.Contains("watch") => "⌚",
                 string s when s.Contains("аудио") || s.Contains("наушник") => "🎵",
-                string s when s.Contains("игров") || s.Contains("приставк") => "🎮",
+                string s when s.Contains("игровые приставки") || s.Contains("приставк") => "🎮",
                 string s when s.Contains("монитор") || s.Contains("экран") => "🖥️",
-                string s when s.Contains("клавиатур") => "⌨️",
-                string s when s.Contains("мыш") || s.Contains("mouse") => "🖱️",
+                string s when s.Contains("клавиатура") => "⌨️",
+                string s when s.Contains("мышка") || s.Contains("mouse") => "🖱️",
                 _ => "📦"
             };
         }

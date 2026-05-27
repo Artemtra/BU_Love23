@@ -127,7 +127,7 @@
                                         <ComboBox.ItemContainerStyle>
                                             <Style TargetType="ComboBoxItem">
                                                 <Setter Property="Background" Value="#2d2d2d"/>
-                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter Property="Foreground" Value="White  "/>
                                                 <Setter Property="FontSize" Value="14"/>
                                                 <Setter Property="Padding" Value="10,5"/>
                                                 <Style.Triggers>
