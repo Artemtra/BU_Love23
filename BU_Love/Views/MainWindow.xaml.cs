@@ -109,6 +109,7 @@ namespace BU_Love
                 ProfileButton.Content = "👤 ВОЙТИ";
                 ProfileButton.Background = new SolidColorBrush(Color.FromRgb(0x21, 0x96, 0xF3));
             }
+
         }
 
 private void CartButton_Click(object sender, RoutedEventArgs e)
@@ -130,6 +131,7 @@ private void CartButton_Click(object sender, RoutedEventArgs e)
             };
 
             loginWindow.ShowDialog();
+            UpdateProfileButton();
         }
 
         private void UpdateCartInfo()
