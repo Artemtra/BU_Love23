@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BU_Love", "BU_Love\BU_Love.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BU_Love.API", "BU_Love.API\BU_Love.API.csproj", "{FC33D1A6-84E7-48CE-9E9B-8A3F55863940}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{54C16756-2E9F-41BD-9412-E2A4E4C18E17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +26,10 @@ Global
 		{FC33D1A6-84E7-48CE-9E9B-8A3F55863940}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC33D1A6-84E7-48CE-9E9B-8A3F55863940}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC33D1A6-84E7-48CE-9E9B-8A3F55863940}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54C16756-2E9F-41BD-9412-E2A4E4C18E17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54C16756-2E9F-41BD-9412-E2A4E4C18E17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54C16756-2E9F-41BD-9412-E2A4E4C18E17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54C16756-2E9F-41BD-9412-E2A4E4C18E17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
